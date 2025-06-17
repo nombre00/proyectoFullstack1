@@ -135,7 +135,7 @@ public class ProductoServiceTest {
         verify(pr, times(1)).save(p1);
     }
 
-    // Provamos .borrar()
+    // Probamos .borrar()
     @Test
     void probarBorrar() {
         // Definimos el comportamiento del mock repositorio.

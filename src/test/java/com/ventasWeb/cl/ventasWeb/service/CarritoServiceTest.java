@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -61,7 +63,7 @@ public class CarritoServiceTest {
     @Test
     void probarBuscarTodosBien(){
         // Definimos el comportamiento del Mock repositorio.
-        // Hacemos una lista y le agregamos los productos.
+        // Hacemos una lista y le agregamos los carritos.
         List<Carrito> carritos = Arrays.asList(c1,c2);
         when(cr.findAll()).thenReturn(carritos);
 
@@ -76,6 +78,8 @@ public class CarritoServiceTest {
         assertEquals(2, carritos2.get(1).getId_carrito());
         assertFalse(carritos2.get(0).isPagado());
         assertFalse(carritos2.get(1).isPagado());
+        // Verificamos que el método haya sido llamado una vez.
+        verify(cr, times(1)).findAll();
     }
 
     // Probando .buscarTodos() cuando no hay productos.
@@ -115,6 +119,45 @@ public class CarritoServiceTest {
     // Probando .buscarPorId() cuando no encuentra un carrito.
     @Test
     void probarBuscarPorIdMal() {
-        
+
     }
+
+    // Probamos .guardar.
+    @Test
+    void probarGuardar() {
+        // Definimos el comportamiento del mock repositorio.
+        when(cr.save(any(Carrito.class))).thenReturn(c1);
+
+        // LLamamos al método .guardar() de carritoService.
+        Carrito c3 = cs.guardar(c1);
+
+        // Verificaciones.
+        // Verificamos que c3 no sea nulo.
+        assertNotNull(c3);
+        // Verificamos que el id de c3 sea igual al de c1.
+        assertEquals(c1.getId_carrito(), c3.getId_carrito());
+        // Verificamos que el método fue llamado una vez.
+        verify(cr, times(1)).save(c1);
+    }
+
+    // Probamos .borrar().
+    @Test
+    void probarBorrar() {
+        // Definimos el comportamiento del mock repositorio.
+        doNothing().when(cr).deleteById(c1.getId_carrito());
+
+        // LLamamos al método .borrar() de carritoService.
+        cs.borrar(c1.getId_carrito());
+
+        // Verificaciones.
+        // Verificamos que el método fue llamado una vez.
+        verify(cr, times(1)).deleteById(c1.getId_carrito());
+    }
+
+    // Probamos calcularValorCarrito().
+    @Test
+    void probarValor() {
+
+    }
+
 }

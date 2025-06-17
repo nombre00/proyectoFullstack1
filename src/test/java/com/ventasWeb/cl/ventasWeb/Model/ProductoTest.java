@@ -1,4 +1,9 @@
-/* package com.ventasWeb.cl.ventasWeb.Model;
+/* 
+Comentamos esta prueba ya que al ser una prueba de integración nesesita conectarse a la base de datos cada vez y eso
+dificulta mucho hacer push en git, solo vamos a hacer pruebas unitarias.
+
+
+package com.ventasWeb.cl.ventasWeb.Model;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

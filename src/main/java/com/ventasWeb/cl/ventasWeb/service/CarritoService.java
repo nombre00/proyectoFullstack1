@@ -47,7 +47,7 @@ public class CarritoService {
         cr.deleteById(id);
     }
 
-    // Calcular valor carrito.
+    // Calcular valor carrito. 
     public int valor(long id_carrito){
         // Buscamos el carrito por id y lo guardamos en una variable.
         Carrito carrito = cr.findById(id_carrito).get();
