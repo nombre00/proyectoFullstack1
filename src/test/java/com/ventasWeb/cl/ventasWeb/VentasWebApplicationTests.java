@@ -14,3 +14,12 @@ class VentasWebApplicationTests {
 	}
 
 }
+
+
+/* 
+Comandos para subir el código a github.
+
+git add .
+git commit -m "Agrega configuración de GitHub Actions para CI"
+git push origin main 
+*/
