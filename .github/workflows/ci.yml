@@ -1,4 +1,4 @@
-name: CI Pipeline for VENTASWEB6 (No Tests)
+name: CI Pipeline for VENTASWEB6
 on:
   push:
     branches: [ main ]
@@ -15,5 +15,5 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+    - name: Vonstruir con maven y correr las pruebas
+      run: mvn -B test --file pom.xml
