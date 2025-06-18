@@ -22,10 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+// import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ventasWeb.cl.ventasWeb.model.Carrito;
+import com.ventasWeb.cl.ventasWeb.model.Cliente;
 import com.ventasWeb.cl.ventasWeb.model.DetalleCarrito;
+import com.ventasWeb.cl.ventasWeb.model.Producto;
 import com.ventasWeb.cl.ventasWeb.repository.CarritoRepository;
 
 // Al hacer esto podemos hacer las pruebas sin tener que cargar todo el hambiente, hacer hibernate, etc...
@@ -35,6 +38,14 @@ public class CarritoServiceTest {
     // Creamos el mock del repositorio para simular su comportamiento.
     @Mock
     private CarritoRepository cr;
+    // Creamos el mock del ProductoServicio para simular su comportamiento.
+    @Mock
+    private ProductoService ps;
+    // Creamos el mock del DetalleCarritoService para simular su comportamiento.
+    @Mock
+    private DetalleCarritoService dcs;
+    @Mock
+    private ClienteService cls;
 
     // Creamos una istancia de CarritoService y le inyectamos los mocks que creamos.
     @InjectMocks
@@ -42,12 +53,34 @@ public class CarritoServiceTest {
 
     // Preparamos las variables que vamos a usar en los tests.
     // Declaramos las variables.
+    private Producto p1;
+    private Producto p2;
+    private DetalleCarrito dc1;
+    private DetalleCarrito dc2;
     private Carrito c1;
     private Carrito c2;
+    private Cliente cl1;
 
     // Generamos una acción que se hace antes de cada test, esta acción es inicializar las variables.
     @BeforeEach
     void setUp(){
+        // Inicializamos 2 productos.
+        p1 = new Producto();
+        p2 = new Producto();
+        p1.setId_producto(Long.valueOf(1));
+        p2.setId_producto(Long.valueOf(2));
+        p1.setCantidad(50);
+        p2.setCantidad(40);
+        p1.setNombre("frutos secos");
+        p2.setNombre("bolsas papel");
+        p1.setPrecio(1300);
+        p2.setPrecio(900);
+        // Inicializamos 2 detalleCarritos.
+        dc1 = new DetalleCarrito();
+        dc2 = new DetalleCarrito();
+        dc1.setId_detalleCarrito(Long.valueOf(1));
+        dc2.setId_detalleCarrito(Long.valueOf(2));
+        // Inicializamos 2 carritos.
         c1 = new Carrito();
         c2 = new Carrito();
         c1.setId_carrito(Long.valueOf(1));
@@ -56,6 +89,10 @@ public class CarritoServiceTest {
         c2.setDetallesCarrito(new ArrayList<DetalleCarrito>());
         c1.setPagado(false);
         c2.setPagado(false);
+        // Inicializamos 1 cliente.
+        cl1 = new Cliente();
+        cl1.setRun_cliente(1L);
+        cl1.setNombre_completo("nombre");
     }
 
     // Métodos.
@@ -151,7 +188,114 @@ public class CarritoServiceTest {
     // Probamos calcularValorCarrito().
     @Test
     void probarValor() {
+        // Preparamos las variables, vamos a agregar 2 detalleCarrito al carrito, cada una con un producto.
+        dc1.setProducto(p1);
+        dc1.setCantidadSolicitada(3);
+        dc2.setProducto(p2);
+        dc2.setCantidadSolicitada(4);
+        c1.getDetallesCarrito().add(dc1);
+        c1.getDetallesCarrito().add(dc2);
 
+        // Definimos el comportamiento los mocks.
+        when(cr.findById(1L)).thenReturn(Optional.of(c1));
+        // Recibimos cualquier long de argumento y retornamos un valor dinámico relativo al input.
+        when(dcs.valor(any(Long.class))).thenAnswer(invocation -> {
+            // Inicializamos una variable de tipo detalleCarrito.
+            DetalleCarrito dc = new DetalleCarrito();
+            // Tomamos el argumento dado y lo guardamos en una variable.
+            Long id = invocation.getArgument(0);
+            // Dependiendo del valor de la variable guardamos en dc el detalleCarrito correspondiente.
+            if (id == dc1.getId_detalleCarrito()){
+                dc = dc1;
+            }
+            if (id == dc2.getId_detalleCarrito()){
+                dc = dc2;
+            }
+            // Retornamos el valor del detalleCarrito.
+            return dc.getCantidadSolicitada() * dc.getProducto().getPrecio();
+        });
+
+        // LLamamos al método .valor() de carritoService.
+        int precio = cs.valor(1);
+
+        // Verificiones.
+        // Verificamos que el precio sea el que corresponde.
+        int total = dc1.getCantidadSolicitada() * dc1.getProducto().getPrecio() + dc2.getCantidadSolicitada() * dc2.getProducto().getPrecio();
+        assertEquals(total, precio);
+        // Verificamos que el método fue llamado una vez.
+        verify(cr, times(1)).findById(1L);
     }
 
+    // Probamos .agregarDetalleCarrito()
+    @Test
+    void probarAgregarDetalleCarrito() {
+        // Definimos el comportamiento de los mocks.
+        when(cr.findById(1L)).thenReturn(Optional.of(c1));
+        when(dcs.buscarPorId(1L)).thenReturn(dc1);
+        when(cr.save(c1)).thenReturn(c1);
+
+        // LLamamos al método .agregarDetalleCarrito()
+        Carrito c3 = cs.agregarDetalleCarrito(1L, 1L);
+
+        // Verificiones.
+        // Verificamos que c3  contenga un carrito con id 1L.
+        assertEquals(1L, c3.getDetallesCarrito().get(0).getId_detalleCarrito());
+        // Verificamos que cada método fue llamado una vez.
+        verify(cr, times(1)).findById(1L);
+        verify(dcs, times(1)).buscarPorId(1L);
+        verify(cr, times(1)).save(c1);
+    }
+
+    //probar .agregarProductoCarrito()
+    @Test
+    void probarAgregarProductoCarrito() {
+        // Preparamos las variables a usar.
+        cl1.setCarrito(c1);
+        // Definimos el comportamiento de los mocks.
+        when(cls.buscarPorId(1L)).thenReturn(cl1);
+        when(ps.buscarPorId(1L)).thenReturn(p1);
+        when(dcs.guardar(any(DetalleCarrito.class))).thenAnswer(invocation -> {
+            DetalleCarrito dc = invocation.getArgument(0);
+            return dc;
+        });
+        when(cs.guardar(any(Carrito.class))).thenReturn(c1);
+        when(cls.guardar(cl1)).thenReturn(cl1);
+
+        // LLamamos al método.
+        Carrito c3 = cs.agregarProductoCarrito(1L, 1L, 11);
+
+        // Verificaciones.
+        // Verificamos que el carrito contenga el producto agregado.
+        assertEquals(p1.getNombre(), c3.getDetallesCarrito().get(0).getProducto().getNombre());
+        verify(cls, times(2)).buscarPorId(1L);
+        verify(ps, times(1)).buscarPorId(1L);
+        verify(dcs, times(1)).guardar(any(DetalleCarrito.class));
+        verify(cls, times(1)).guardar(cl1);
+    }
+
+    // Probando .eliminarDetalle()
+    @Test
+    void probarEliminarDetalle() {
+        // Preparamos las variables.
+        c1.getDetallesCarrito().add(dc1);
+        c1.getDetallesCarrito().add(dc2);
+        // Definimos el comportamiento de los mocks.
+        when(cr.findById(1L)).thenReturn(Optional.of(c1));
+        doNothing().when(dcs).borrar(1L);
+        when(cr.save(any(Carrito.class))).thenAnswer(invocation -> {
+            Carrito c = invocation.getArgument(0);
+            return c;
+        });
+
+        // LLamámos al método .eliminarDetalle()
+        Carrito c3 = cs.eliminarDetalle(1, 1);
+
+        // Verificaciones.
+        // Verificamos que la longitud de la lista detalles sea 1.
+        assertEquals(1, c3.getDetallesCarrito().size());
+        // Verificamos que los métodos fueron llamados cada uno una vez.
+        verify(cr, times(1)).findById(1L);
+        verify(dcs, times(1)).borrar(1L);
+        verify(cr, times(1)).save(any(Carrito.class));
+    }
 }

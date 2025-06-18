@@ -206,4 +206,25 @@ public class DetalleCarritoServiceTest {
         verify(ps, times(1)).buscarPorId(1L);
         verify(dcr, times(1)).save(any(DetalleCarrito.class));
     }
+
+    // Probamos .cambiarCantidad()
+    @Test
+    void probarCambiarCantidad() {
+        // Definimos las variables que vamos a ocupar.
+        int idDetalleCarrito = 1;
+        int cantidad = 7;
+        // Definimos el comportamiento del mock repositorio.
+        when(dcr.findById(1L)).thenReturn(Optional.of(dc1));
+        when(dcr.save(dc1)).thenReturn(dc1);
+
+        // LLamamos el método .cambiarCantidad() de detalleCarritoService()
+        DetalleCarrito dc3 = dcs.cambiarCantidad(idDetalleCarrito, cantidad);
+
+        // Verificaciones.
+        // Verificamos que la cantidad cambió.
+        assertEquals(cantidad, dc3.getCantidadSolicitada());
+        // Verificamos que cada método fue llamado una vez.
+        verify(dcr, times(1)).findById(1L);
+        verify(dcr, times(1)).save(dc1);
+    }
 }

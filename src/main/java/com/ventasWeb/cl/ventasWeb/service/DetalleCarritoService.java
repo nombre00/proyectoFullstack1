@@ -18,9 +18,10 @@ public class DetalleCarritoService {
     // LLamamos al repositorio de la clase.    
     @Autowired
     private DetalleCarritoRepository DCR;
-    // LLamamos al repositorio de producto.
+    // LLamamos al service de producto.
     @Autowired
     private ProductoService PS;
+    // LLamamos al service de carrito.
 
     // Métodos.
     // Buscar todos.
@@ -40,7 +41,7 @@ public class DetalleCarritoService {
         DCR.deleteById(id);
     }
 
-    // Calcular valor.
+    // Calcular valor. 
     public int valor(long id){
         // Buscamos el detalleCarrito por id y luego lo guardamos en una variable.
         // Para buscar por id tenemos que convertir int a long.
@@ -69,10 +70,19 @@ public class DetalleCarritoService {
     }
 
     // Cambiar la cantidad de un producto en el detalleCarrito.
-    public DetalleCarrito cambiarCantidad(int id_carrito, int cantidad){
-        // Buscamos por id e ingresamos la nueva cantidad.
+    public DetalleCarrito cambiarCantidad(int id_Dcarrito, int cantidad){
+        /* // Buscamos por id e ingresamos la nueva cantidad.
         DCR.findById(Long.valueOf(id_carrito)).get().setCantidadSolicitada(cantidad);
+        // Guardamos.
+        DCR.findById(Long.valueOf(id_carrito));
         // Retornamos el detalle editado.
-        return DCR.findById(Long.valueOf(id_carrito)).get();
+        return DCR.findById(Long.valueOf(id_carrito)).get(); */
+
+        // Buscamos el DetalleCarrito y lo guardamos en una variable.
+        DetalleCarrito detalleCarrito = DCR.findById(Long.valueOf(id_Dcarrito)).get();
+        // Modificamos la cantidad.
+        detalleCarrito.setCantidadSolicitada(cantidad);
+        // Persistimos el cambio y lo retornamos.
+        return DCR.save(detalleCarrito);
     }
 }

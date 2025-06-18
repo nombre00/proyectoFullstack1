@@ -88,6 +88,8 @@ public class CarritoService {
         detalleNuevo.setProducto(producto);
         // Guardamos el detalle nuevo. 
         dcs.guardar(detalleNuevo);
+        // Agregamos el detalle al carrito.
+        carrito.getDetallesCarrito().add(detalleNuevo);
         // Guardamos el carrito actualizado.
         cr.save(carrito);
         // Guardamos el cliente.
