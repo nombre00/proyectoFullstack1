@@ -116,12 +116,6 @@ public class CarritoServiceTest {
         verify(cr, times(1)).findById(Long.valueOf(1));
     }
 
-    // Probando .buscarPorId() cuando no encuentra un carrito.
-    @Test
-    void probarBuscarPorIdMal() {
-
-    }
-
     // Probamos .guardar.
     @Test
     void probarGuardar() {

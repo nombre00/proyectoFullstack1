@@ -64,9 +64,8 @@ public class DetalleCarritoService {
         // Asignamos el producto y la cantidad al dc.
         dc.setProducto(p);
         dc.setCantidadSolicitada(cantidad);
-        // Lo guardamos.
-        DCR.save(dc);
-        return dc;
+        // Lo guardamos y retornamos.
+        return DCR.save(dc);
     }
 
     // Cambiar la cantidad de un producto en el detalleCarrito.

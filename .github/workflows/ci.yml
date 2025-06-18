@@ -15,5 +15,5 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Vonstruir con maven y correr las pruebas
+    - name: Construir con maven y correr las pruebas
       run: mvn -B test --file pom.xml
