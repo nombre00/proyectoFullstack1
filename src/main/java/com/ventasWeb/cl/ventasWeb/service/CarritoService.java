@@ -51,7 +51,7 @@ public class CarritoService {
     public int valor(long id_carrito){
         // Buscamos el carrito por id y lo guardamos en una variable.
         Carrito carrito = cr.findById(id_carrito).get();
-        // Creamos una lista de Integer que guarda los id de los detalle del carrito.
+        // Creamos una lista que guarda los detalle del carrito.
         List<DetalleCarrito> detalles = carrito.getDetallesCarrito();
         // Teniendo los detalles del carrito ahora podemos calcular el precio.
         int total = 0;

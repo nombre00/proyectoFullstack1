@@ -45,7 +45,7 @@ public class VentaWebService {
     @Autowired
     private FacturaRepository fr;
 
-    // Métodos genéricos.
+    // Métodos genéricos. 
 
     // Buscar todos.
     public List<VentaWeb> buscarTodos(){
@@ -85,7 +85,7 @@ public class VentaWebService {
     // Eliminar producto del carrito.
     public Carrito eliminarProductoCarrito(long run, long id_detalle){
         // eliminamos el detalle que contiene el producto que no queremos en el carrito.
-        // Retornamos el carrito actualizado.
+        // Retornamos el carrito actualizado. 
         return cs.eliminarDetalle(id_detalle, cls.buscarPorId(run).getCarrito().getId_carrito());
     }
 

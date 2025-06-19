@@ -183,7 +183,7 @@ public class CarritoServiceTest {
         cs.borrar(c1.getId_carrito());
 
         // Verificaciones.
-        // Verificamos que el método fue llamado una vez.
+        // Verificamos que el método fue llamado una vez. 
         verify(cr, times(1)).deleteById(c1.getId_carrito());
     }
 

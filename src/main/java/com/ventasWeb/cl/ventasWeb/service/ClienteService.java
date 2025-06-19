@@ -49,7 +49,7 @@ public class ClienteService {
             if (nombre.equals(c.getNombre_completo())){
                 // Comparamos la clave.
                 if (clave.equals(c.getClave())){
-                    // Si ambas coinciden cambiamos el flac a true;
+                    // Si ambas coinciden cambiamos el flag a true;
                     flag = true;
                 }
             }

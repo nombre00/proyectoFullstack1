@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -140,5 +141,39 @@ public class ClienteServiceTest {
         // Verificaciones.
         // Verificamos que el mock fue llamado una vez.
         verify(cr, times(1)).deleteById(1L);
+    }
+
+    // Probamos .ingresar() cuando los datos son correctos.
+    @Test
+    void probarIngresarBien() {
+        // Definimos el comportamiento del mock.
+        List<Cliente> clientes = Arrays.asList(cliente1, cliente2);
+        when(cr.findAll()).thenReturn(clientes);
+
+        // LLamamos al método .ingresar()
+        Boolean resultado = cs.ingresar("nombre completo segundo", "clave 2");
+
+        // Verificaciones.
+        // Verificamos que resultado sea verdad.
+        assertTrue(resultado);
+        // Verificamos que el mock fue llamado una vez.
+        verify(cr, times(1)).findAll();
+    }
+
+    // Probamos .ingresar() cuando los datos son incorrectos.
+    @Test
+    void probarIngresarMal() {
+        // Definimos el comportamiento del mock.
+        List<Cliente> clientes = Arrays.asList(cliente1, cliente2);
+        when(cr.findAll()).thenReturn(clientes);
+
+        // LLamamos al método .ingresar()
+        Boolean resultado = cs.ingresar("nombre incompleto", "clave 3");
+
+        // Verificaciones.
+        // Verificamos que resultado sea verdad.
+        assertFalse(resultado);
+        // Verificamos que el mock fue llamado una vez.
+        verify(cr, times(1)).findAll();
     }
 }
