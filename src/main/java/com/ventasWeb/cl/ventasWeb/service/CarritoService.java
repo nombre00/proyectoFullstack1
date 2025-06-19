@@ -161,7 +161,7 @@ public class CarritoService {
             // Agregamos los ids al arreglo.
             ids_productosCarrito.add(detCar.getProducto().getId_producto());
         }
-        // Creamos una lista de Integers donde guardar los ids.
+        // Creamos una lista de Integers donde guardar los ids de los productos de la base de datos.
         List<Long> IDs = ids_productosCarrito;
         // Buscamos todos los ids de los productos y los guardamos en una lista.
         List<Long> ids_productos = ps.buscarTodosIds();
@@ -173,13 +173,15 @@ public class CarritoService {
 
     // Revisamos el estado del carrito, si está pagado borramos los detalles para volver a ser usado.
     @Transactional
-    public void revisarPago(Carrito c){
+    public Carrito revisarPago(Carrito c){
         Carrito car = cr.findById(c.getId_carrito()).get();
         // Revisamos si el carrito está pagado.
         if (car.isPagado()){
             // Si lo está borramos los detalles.
             car.setDetallesCarrito(null);
-            cr.save(car);
+            return cr.save(car);
+        }else {
+            return car;
         }
     }
 }
