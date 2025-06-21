@@ -8,5 +8,5 @@ public class VentasWebVMAplication {
     
     public static void main(String[] args){
         SpringApplication.run(VentasWebVMAplication.class, args);
-    }
+    }   
 }

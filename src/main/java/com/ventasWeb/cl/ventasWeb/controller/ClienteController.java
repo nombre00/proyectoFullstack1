@@ -19,6 +19,7 @@ import com.ventasWeb.cl.ventasWeb.service.CarritoService;
 import com.ventasWeb.cl.ventasWeb.service.ClienteService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -72,7 +73,11 @@ public class ClienteController {
     @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Cliente> buscarPorRun(@PathVariable int id){
+    // Agregamos : @Parameter(description = "ID del cliente a buscar", required = true).
+    // Esto es para agregar una explicación de que hace esa variable y señalar que es obligatoria.
+    // No es necesaria para que swagger reconozca el argumento en la URL.
+    public ResponseEntity<Cliente> buscarPorRun(@Parameter(description = "ID del cliente a buscar", required = true)
+        @PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por run y guardamos el producto en una variable.
@@ -92,11 +97,18 @@ public class ClienteController {
         @ApiResponse(responseCode = "200", description = "Cliente agregado exitosamente.",
         content = @Content(mediaType = "application/json", 
         schema = @Schema (implementation = Cliente.class))),
-    @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Cliente> guardar (@RequestBody Cliente c){
-        // Creamos una variable que contiene el nuevo producto y y revisamos si incluye un carrito, sino, lo creamos.
+    public ResponseEntity<Cliente> guardar (
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos del nuevo cliente",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Cliente.class))
+        )
+        @RequestBody Cliente c){
+        // Creamos una variable que contiene el nuevo cliente y y revisamos si incluye un carrito, sino, lo creamos.
         Cliente C = c;
         if (C.getCarrito() == null){
             Carrito carrito = new Carrito();
@@ -120,7 +132,11 @@ public class ClienteController {
     @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<?> borrar(@PathVariable Long id){
+    // Agregamos : @Parameter(description = "ID del cliente a eliminar", required = true).
+    // Esto es para agregar una explicación de que hace esa variable y señalar que es obligatoria.
+    // No es necesaria para que swagger reconozca el argumento en la URL.
+    public ResponseEntity<?> borrar(@Parameter(description = "ID del cliente a eliminar", required = true)
+        @PathVariable Long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Como acá no guardamos usamos el service directamente.
@@ -145,7 +161,18 @@ public class ClienteController {
     @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Cliente> actualizar (@PathVariable long id, @RequestBody Cliente c){
+    public ResponseEntity<Cliente> actualizar (
+        // Parameter es para el swagger.
+        @Parameter(description = "ID del cliente a actualizar", required = true)
+        @PathVariable long id, 
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Nuevos datos del cliente",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Cliente.class))
+        )
+        @RequestBody Cliente c){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos el producto a editar y lo guardamos en una variable.
@@ -181,7 +208,10 @@ public class ClienteController {
     @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<String> ingresar(@PathVariable String nombre, @PathVariable String clave){
+    public ResponseEntity<String> ingresar(
+        // Parameter es para el swagger.
+        @Parameter(description = "Nombre del cliente", required = true)@PathVariable String nombre, 
+        @Parameter(description = "Clave del cliente", required = true)@PathVariable String clave){
         // Creamos un string.
         String sentencia = "";
         // Le pasamos los argumentos a la función que revisa la clave e is.
@@ -206,7 +236,8 @@ public class ClienteController {
     @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Cliente> actualizarCarro(@PathVariable long id){
+    public ResponseEntity<Cliente> actualizarCarro(@Parameter(description = "Id del cliente", required = true)
+    @PathVariable long id){
         // Buscamos el cliente y lo guardamos en una variable.
         Cliente cliente = cs.buscarPorId(id);
         // Buscamos el carrito viejo y lo guardamos en una variable.

@@ -19,6 +19,7 @@ import com.ventasWeb.cl.ventasWeb.service.CarritoService;
 import com.ventasWeb.cl.ventasWeb.service.ClienteService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -72,7 +73,11 @@ public class CarritoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Carrito> buscarPorRun(@PathVariable int id){
+    // Agregamos : @Parameter(description = "ID del carrito a buscar", required = true).
+    // Esto es para agregar una explicación de que hace esa variable y señalar que es obligatoria.
+    // No es necesaria para que swagger reconozca el argumento en la URL.
+    public ResponseEntity<Carrito> buscarPorRun(@Parameter(description = "ID del carrito a buscar", required = true)
+        @PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por run y guardamos el carrito en una variable.
@@ -95,7 +100,15 @@ public class CarritoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Carrito> guardar (@RequestBody Carrito c){
+    public ResponseEntity<Carrito> guardar (
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos del nuevo carrito",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Carrito.class))
+        )
+        @RequestBody Carrito c){
         // Creamos una variable que contiene el nuevo carrito y lo guardamos al mismo tiempo.
         Carrito C = cs.guardar(c);
         // Retornamos una respuesta que contiene el carrito.
@@ -112,7 +125,11 @@ public class CarritoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<?> borrar(@PathVariable Long id){
+    // Agregamos : @Parameter(description = "ID del carrito a eliminar", required = true).
+    // Esto es para agregar una explicación de que hace esa variable y señalar que es obligatoria.
+    // No es necesaria para que swagger reconozca el argumento en la URL.
+    public ResponseEntity<?> borrar(@Parameter(description = "ID del carrito a eliminar", required = true)
+        @PathVariable Long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Como acá no guardamos usamos el service directamente.
@@ -137,7 +154,18 @@ public class CarritoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Carrito> actualizar (@PathVariable long id, @RequestBody Carrito c){
+    public ResponseEntity<Carrito> actualizar (
+        // Parameter es para el swagger.
+        @Parameter(description = "ID del carrito a actualizar", required = true)
+        @PathVariable long id, 
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Nuevos datos del carrito",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Carrito.class))
+        )
+        @RequestBody Carrito c){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos el producto a editar y lo guardamos en una variable.
@@ -166,7 +194,11 @@ public class CarritoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el producto y/o carrito."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Carrito> agregarProductoCarrito(@PathVariable long id_producto, @PathVariable long run_cliente, @PathVariable int cantidad) {
+    public ResponseEntity<Carrito> agregarProductoCarrito(
+        // Parameter es para el swagger.
+        @Parameter(description = "ID del producto que vamos a agregar", required = true)@PathVariable long id_producto, 
+        @Parameter(description = "ID del cliente", required = true)@PathVariable long run_cliente, 
+        @Parameter(description = "cantidad del producto", required = true)@PathVariable int cantidad) {
         // LLamamos a la funcion que hace la pega.
         cs.agregarProductoCarrito(id_producto, run_cliente, cantidad);
         Cliente cliente = cls.buscarPorId(run_cliente);

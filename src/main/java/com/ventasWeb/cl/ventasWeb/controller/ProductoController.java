@@ -17,6 +17,7 @@ import com.ventasWeb.cl.ventasWeb.model.Producto;
 import com.ventasWeb.cl.ventasWeb.service.ProductoService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,7 +45,7 @@ public class ProductoController {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
         content = @Content(mediaType = "application/json", 
         schema = @Schema (implementation = Producto.class))),
-    @ApiResponse(responseCode = "404", description = "no se encontraron productos."),
+    @ApiResponse(responseCode = "204", description = "Sin contenido."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
     public ResponseEntity<List<Producto>> buscarTodos(){
@@ -68,7 +69,11 @@ public class ProductoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el producto."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Producto> buscarPorRun(@PathVariable int id){
+    // Agregamos : @Parameter(description = "ID del producto a buscar", required = true).
+    // Esto es para agregar una explicación de que hace esa variable y señalar que es obligatoria.
+    // No es necesaria para que swagger reconozca el argumento en la URL.
+    public ResponseEntity<Producto> buscarPorRun(@Parameter(description = "ID del producto a buscar", required = true)
+    @PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por run y guardamos el producto en una variable.
@@ -91,7 +96,11 @@ public class ProductoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el producto."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Producto> buscarPorNombre(@PathVariable String nombre){
+    // Agregamos @Parameter(description = "Nombre del producto a buscar", required = true).
+    // Esto es para agregar una explicación de que hace esa variable y señalar que es obligatoria.
+    // No es necesaria para que suagger reconozca el argumento en la URL.
+    public ResponseEntity<Producto> buscarPorNombre(@Parameter(description = "Nombre del producto a buscar", required = true)
+    @PathVariable String nombre){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por run y guardamos el producto en una variable.
@@ -108,13 +117,21 @@ public class ProductoController {
     @PostMapping ("/agregar")
     @Operation(summary = "Agrega un producto", description = "Crea un producto.")
     @ApiResponses( value = {
-        @ApiResponse(responseCode = "200", description = "Creación ejecutada exitosamente.",
+        @ApiResponse(responseCode = "201", description = "Creación ejecutada exitosamente.",
         content = @Content(mediaType = "application/json",
         schema = @Schema (implementation = Producto.class))),
-    @ApiResponse(responseCode = "404", description = "no se creó el producto."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Producto> guardar (@RequestBody Producto p){
+    public ResponseEntity<Producto> guardar (
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos del nuevo producto",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Producto.class))
+        )
+        @RequestBody Producto p ){
+
         // Creamos una variable que contiene el nuevo producto y lo guardamos al mismo tiempo.
         Producto P = Pservice.guardar(p);
         // Retornamos una respuesta que contiene el producto.
@@ -131,7 +148,11 @@ public class ProductoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el producto."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<?> borrar(@PathVariable Long id){
+    // Agregamos: @Parameter(description = "ID del producto a buscar", required = true).
+    // Esto es para agregar una explicación de que hace esa variable y señalar que es obligatoria.
+    // No es necesaria para que suagger reconozca el argumento en la URL.
+    public ResponseEntity<?> borrar(@Parameter(description = "ID del producto a eliminar", required = true)
+        @PathVariable Long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Como acá no guardamos usamos el service directamente.
@@ -153,10 +174,22 @@ public class ProductoController {
         @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
         content = @Content(mediaType = "application/json",
         schema = @Schema (implementation = Producto.class))),
+    @ApiResponse(responseCode = "400", description = "Solicitud inválida (datos incorrectos)."),
     @ApiResponse(responseCode = "404", description = "no se creó el producto."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Producto> actualizar (@PathVariable long id, @RequestBody Producto p){
+    public ResponseEntity<Producto> actualizar (
+        // Parameter es para el swagger.
+        @Parameter(description = "ID del producto a actualizar", required = true)
+        @PathVariable long id, 
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Nuevos datos del producto",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Producto.class))
+        )
+        @RequestBody Producto p){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos el producto a editar y lo guardamos en una variable.
