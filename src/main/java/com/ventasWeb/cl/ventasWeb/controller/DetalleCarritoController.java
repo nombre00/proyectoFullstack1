@@ -13,12 +13,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 
+import com.ventasWeb.cl.ventasWeb.model.Cliente;
 import com.ventasWeb.cl.ventasWeb.model.DetalleCarrito;
 import com.ventasWeb.cl.ventasWeb.service.DetalleCarritoService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 
 @RestController
 @RequestMapping ("/api/v1/detalle_carrito")
+// @Tag es para la documentación.
+@Tag(name = "DetalleCarrito", description = "Son las operaciones relacionadas con los DetalleCarrito.")
 public class DetalleCarritoController {
 
     // Creamos la variable que contiene la funcionalidad del service.
@@ -30,6 +41,14 @@ public class DetalleCarritoController {
 
     // Método que lista los detalleCarrito.
     @GetMapping("/listar")
+    @Operation(summary = "Obtener todos los detalleCarrito.", description = "Obtiene una lista con todos los detalleCarrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = DetalleCarrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontraron detalleCarritos."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<List<DetalleCarrito>> buscarTodos(){
         // Buscamos los detalles y los guardamos en una variable.
         List<DetalleCarrito> detalles = DCS.buscarTodos();
@@ -43,7 +62,16 @@ public class DetalleCarritoController {
 
     // Método para buscar por id.
     @GetMapping ("/{id}")
-    public ResponseEntity<DetalleCarrito> buscarPorRun(@PathVariable int id){
+    @Operation(summary = "Obtener un detalleCarrito por su id.", description = "Obtiene un detalleCarrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = DetalleCarrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el detalleCarrito."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<DetalleCarrito> buscarPorRun(@Parameter(description = "ID del detalleCarrito a buscar", required = true)
+        @PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por id y guardamos el detalle en una variable.
@@ -58,7 +86,22 @@ public class DetalleCarritoController {
 
     // Método para guardar.
     @PostMapping("/agregar")
-    public ResponseEntity<DetalleCarrito> guardar (@RequestBody DetalleCarrito dc){
+    @Operation(summary = "Agrega un detalleCarrito nuevo.", description = "Agrega un DetalleCarrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "DetalleCarrito agregado exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = DetalleCarrito.class))),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<DetalleCarrito> guardar (
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos del nuevo DetalleCarrito",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Cliente.class))
+        )
+        @RequestBody DetalleCarrito dc){
         // Creamos una variable que contiene el nuevo detalle y lo guardamos al mismo tiempo.
         DetalleCarrito DC = DCS.guardar(dc);
         // Retornamos una respuesta que contiene el detalle.
@@ -67,7 +110,16 @@ public class DetalleCarritoController {
 
     // Método que borra.
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> borrar(@PathVariable Long id){
+    @Operation(summary = "Elimina un detalleCarrito por su id.", description = "Elimina un detalleCarrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = DetalleCarrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el detalleCarrito."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<?> borrar(@Parameter(description = "ID del detalleCarrito a eliminar", required = true)
+        @PathVariable Long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Como acá no guardamos usamos el service directamente.
@@ -84,7 +136,24 @@ public class DetalleCarritoController {
     // Los argumentos que recibe la funcion es un id para buscar el detalle a editar y un detalle nuevo,
     // los atributos de este detalle nuevo van a reemplazar los atributos del detalle encontrado.
     @PutMapping ("/{id}")
-    public ResponseEntity<DetalleCarrito> actualizar (@PathVariable long id, @RequestBody DetalleCarrito dc){
+    @Operation(summary = "Actualiza un detalleCarrito por su id.", description = "Actualiza un detalleCarrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = DetalleCarrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el detalleCarrito."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<DetalleCarrito> actualizar (
+        @Parameter(description = "ID del detalleCarrito a modificar", required = true)@PathVariable long id, 
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos del DetalleCarrito que van a reemplazar los datos del detalleCarrito a modificar.",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Cliente.class))
+        )
+        @RequestBody DetalleCarrito dc){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos el detalle a editar y lo guardamos en una variable.

@@ -13,12 +13,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 
+import com.ventasWeb.cl.ventasWeb.model.Cliente;
 import com.ventasWeb.cl.ventasWeb.model.Envio;
 import com.ventasWeb.cl.ventasWeb.service.EnvioService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 
 @RestController
 @RequestMapping ("/api/v1/envio")
+// @Tag es para la documentación.
+@Tag(name = "Envio", description = "Son las operaciones relacionadas con los envios.")
 public class EnvioController {
 
     // Creamos una variable que contiene la funcionalidad del service.
@@ -32,6 +43,14 @@ public class EnvioController {
 
     // Método que lista los envios.
     @GetMapping("/listar")
+    @Operation(summary = "Obtener todos los envios.", description = "Obtiene una lista con todos los envios.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontraron envios."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<List<Envio>> buscarTodos(){
         // Buscamos los envios y los guardamos en una variable.
         List<Envio> envios = es.buscarTodos();
@@ -45,7 +64,16 @@ public class EnvioController {
 
     // Método que busca por id.
     @GetMapping ("/{id}")
-    public ResponseEntity<Envio> buscarPorId(@PathVariable int id){
+    @Operation(summary = "Obtener un envio por su id.", description = "Obtiene un envío.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el envio."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<Envio> buscarPorId(@Parameter(description = "ID del envio a buscar", required = true)
+        @PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por run y guardamos el envio en una variable.
@@ -59,8 +87,23 @@ public class EnvioController {
     }
 
     // Método para guardar.
-    @PostMapping ("/{id}")
-    public ResponseEntity<Envio> guardar (@RequestBody Envio e){
+    @PostMapping ("/agregar")
+    @Operation(summary = "Guardar un envio.", description = "Guarda un envío.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Creación ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<Envio> guardar (
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos del nuevo envío",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Cliente.class))
+        )
+        @RequestBody Envio e){
         // Creamos una variable que contiene el nuevo envio y lo guardamos al mismo tiempo.
         Envio E = es.guardar(e);
         // Retornamos una respuesta que contiene el envio.
@@ -69,7 +112,16 @@ public class EnvioController {
 
     // Método que borra.
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> borrar(@PathVariable Long id){
+    @Operation(summary = "Eliminar un envio por su id.", description = "Elimina un envío.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el envio."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<?> borrar(@Parameter(description = "ID del envio a borrar", required = true)
+        @PathVariable Long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Como acá no guardamos usamos el service directamente.
@@ -86,7 +138,24 @@ public class EnvioController {
     // Los argumentos que recibe la funcion es un id para buscar el inventario a editar y un inventario nuevo, 
     // los atributos de este inventario nuevo van a reemplazar los atributos del inventario encontrado.
     @PutMapping ("/{id}")
-    public ResponseEntity<Envio> actualizar (@PathVariable long id, @RequestBody Envio en){
+    @Operation(summary = "Actualiza un envio por su id.", description = "Actualiza un envío.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el envio."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<Envio> actualizar (
+        @Parameter(description = "ID del envio a actualizar", required = true)@PathVariable long id, 
+        // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
+        // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos nuevos del envío",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Cliente.class))
+        )
+        @RequestBody Envio en){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos el envio a editar y lo guardamos en una variable.
@@ -109,7 +178,16 @@ public class EnvioController {
 
     // Método para buscar estado del envio por id.
     @GetMapping ("/revisar_estado/{id}")
-    public ResponseEntity<String>estadoPorId(@PathVariable int id){
+    @Operation(summary = "Obtener el estado de un envio por su id.", description = "Obtiene un estado de envío.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el envio."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<String>estadoPorId(@Parameter(description = "ID del envio a buscar", required = true)
+        @PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por id y guardamos el pedido en una variable.
@@ -125,7 +203,17 @@ public class EnvioController {
     }
     // Método para editar el estado del pedido por id.
     @PutMapping ("/editar_estado/{id}")
-    public ResponseEntity<Envio> editarEstado(@PathVariable int id, String estado){
+    @Operation(summary = "Edita el estado de un envio por su id.", description = "Edita el estado de un envío.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Edición ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el envio."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
+    public ResponseEntity<Envio> editarEstado(
+        @Parameter(description = "ID del envio a buscar", required = true)@PathVariable int id, 
+        @Parameter(description = "Nuevo estado del envío", required = true)@PathVariable String estado){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por id y guardamos el pedido en una variable.
