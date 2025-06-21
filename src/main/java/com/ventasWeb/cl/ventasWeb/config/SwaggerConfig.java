@@ -16,6 +16,6 @@ public class SwaggerConfig {
             .info(new Info()
                 .title("API ventasWeb.v1 2025")
                 .version("1.0")
-                .description("Documentación de la API para realizar compras por internet."))
+                .description("Documentación de la API para realizar compras por internet."));
     }
 }
