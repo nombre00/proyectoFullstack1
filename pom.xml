@@ -46,6 +46,12 @@
             <version>3.4.5</version>
             <scope>test</scope>
         </dependency>
+        <!-- Es para documentar usando swagger -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.6.0</version>
+        </dependency>
         <!-- com.h2database es para usar una base de datos local -->
         <!--    
         <dependency>

@@ -138,7 +138,7 @@ public class VentaWebService {
         // Guardamos el detalle en la tabla de detalles.
         dcs.guardar(detalleNuevo);
         // Sumamos el detalleCarrito al carrito.
-        cs.agregarDetalleCarrito(carrito.getId_carrito(), detalleNuevo.getId_detalleCarrito());
+        cs.agregarDetalleCarrito(detalleNuevo.getId_detalleCarrito(), carrito.getId_carrito());
         // Actualizamos el carrito con la nueva lista detalleProducto y lo guardamos.
         cs.guardar(carrito);
         // Actualizamos el cliente con el nuevo carrito actualizado.

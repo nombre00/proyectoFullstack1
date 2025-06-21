@@ -20,13 +20,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.ventasWeb.cl.ventasWeb.model.Carrito;
 import com.ventasWeb.cl.ventasWeb.model.Cliente;
 import com.ventasWeb.cl.ventasWeb.model.Cliente_ventaWeb;
 import com.ventasWeb.cl.ventasWeb.model.DetalleCarrito;
+import com.ventasWeb.cl.ventasWeb.model.Envio;
 import com.ventasWeb.cl.ventasWeb.model.Factura;
 import com.ventasWeb.cl.ventasWeb.model.Producto;
 import com.ventasWeb.cl.ventasWeb.model.VentaWeb;
@@ -202,7 +202,9 @@ public class VentaWebServiceTest {
     @Test
     void probarBuscarProductosBien() {
         // Definimos el comportamiento del mock.
-        List<Producto> productos = Arrays.asList(producto1, producto2);
+        List<Producto> productos = new ArrayList<>();
+        productos.add(producto1);
+        productos.add(producto2);
         when(ps.buscarTodos()).thenReturn(productos);
 
         // LLamamos al método buscarProductos().
@@ -381,5 +383,115 @@ public class VentaWebServiceTest {
         // Verificamos que los mocks fueron llamados.
         verify(cls, times(2)).buscarPorId(1L);
         verify(cs, times(1)).valor(1L);
+    }
+
+    // Probando .ingresarProductoCarrito()
+    @Test
+    void probarIngresarProductoCarrito() {
+        // Preparamos las variables.
+        cliente1.setCarrito(carrito1);
+        // Definimos el comportamiento de los mocks.
+        when(cls.buscarPorId(1L)).thenReturn(cliente1);
+        when(ps.buscarPorId(2L)).thenReturn(producto2);
+        when(dcs.guardar(any(DetalleCarrito.class))).thenAnswer(invocation -> {
+            DetalleCarrito detalle = invocation.getArgument(0);
+            detalle.setId_detalleCarrito(3L);
+            return detalle;
+        });
+        when(cs.agregarDetalleCarrito(3L, 1L)).thenAnswer(invocation -> {
+            Carrito carrito = carrito1;
+            DetalleCarrito detalle = new DetalleCarrito();
+            Long idDetalle = invocation.getArgument(1);
+            detalle.setId_detalleCarrito(idDetalle);
+            detalle.setProducto(producto2);
+            detalle.setCantidadSolicitada(7);
+            carrito.getDetallesCarrito().add(detalle);
+            return carrito;
+        });
+        when(cs.guardar(any(Carrito.class))).thenAnswer(invocation -> {
+            Carrito carrito = invocation.getArgument(0);
+            return carrito;
+        });
+        when(cls.guardar(any(Cliente.class))).thenAnswer(invocation -> {
+            Cliente cliente = invocation.getArgument(0);
+            return cliente;
+        });
+
+        // LLamamos al método .ingresarProductoCarrito()
+        Carrito resultado = vws.ingresarProductoCarrito(1, 2, 7);
+
+        // Verificaciones.
+        // Verificamos que el resultado contiene el producto ingresado.
+        assertEquals(producto2, resultado.getDetallesCarrito().get(0).getProducto());
+        // Verificamos que la cantidad solicitada sea la que corresponde.
+        assertEquals(7, resultado.getDetallesCarrito().get(0).getCantidadSolicitada());
+        // Verificamos que los mocks fueron llamados cada uno una vez.
+        verify(cls, times(1)).buscarPorId(1L);
+        verify(ps, times(1)).buscarPorId(2L);
+        verify(dcs, times(1)).guardar(any(DetalleCarrito.class));
+        verify(cs, times(1)).agregarDetalleCarrito(3L, 1L);
+        verify(cs, times(1)).guardar(any(Carrito.class));
+        verify(cls, times(1)).guardar(any(Cliente.class));
+    }
+
+    // Probando .comprarCarrito()
+    @Test
+    void probarComprarCarrito() {
+        // Preparamos las variables.
+        int pago = 9100;
+        List<Producto> productos = new ArrayList<>();
+        productos.add(producto1);
+        productos.add(producto2);
+        detalle1.setProducto(producto1);
+        detalle1.setCantidadSolicitada(3);
+        detalle1.setCarrito(carrito1);
+        detalle2.setProducto(producto2);
+        detalle2.setCantidadSolicitada(5);
+        detalle2.setCarrito(carrito1);
+        carrito1.getDetallesCarrito().add(detalle1);
+        carrito1.getDetallesCarrito().add(detalle2);
+        cliente1.setCarrito(carrito1);
+        // Definimos el comportamiento de los mocks.
+        when(cls.buscarPorId(1L)).thenReturn(cliente1);
+        when(cs.revisarStock(cliente1.getCarrito().getId_carrito())).thenReturn(true);
+        when(cs.valor(carrito1.getId_carrito())).thenReturn(pago);
+        when(ps.buscarTodos()).thenReturn(productos);
+        when(ps.guardar(any(Producto.class))).thenAnswer(invocation -> {
+            Producto p = invocation.getArgument(0);
+            return p;
+        });
+        when(cs.guardar(any(Carrito.class))).thenAnswer(invocation -> {
+            Carrito c = invocation.getArgument(0);
+            return c;
+        });
+        when(cls.guardar(any(Cliente.class))).thenAnswer(invocation -> {
+            Cliente c = invocation.getArgument(0);
+            return c;
+        });
+        when(es.guardar(any(Envio.class))).thenAnswer(invocation -> {
+            Envio e = invocation.getArgument(0);
+            return e;
+        });
+        when(fr.save(any(Factura.class))).thenAnswer(invocation -> {
+            Factura f = invocation.getArgument(0);
+            return f;
+        });
+        when(vwr.save(any(VentaWeb.class))).thenAnswer(invocation -> {
+            VentaWeb vw = invocation.getArgument(0);
+            return vw;
+        });
+        when(cvr.save(any(Cliente_ventaWeb.class))).thenAnswer(invocation -> {
+            Cliente_ventaWeb cv = invocation.getArgument(0);
+            return cv;
+        });
+
+        // LLamamos al método .comprarCarrito()
+        VentaWeb resultado = vws.comprarCarrito(1L, pago);
+
+        // Verificaciones.
+        // Verificamos que el pago del resultado sea el pago ingresado.
+        assertEquals(pago, resultado.getTotalPagado());
+        // Verificamos que el cliente sea el cliente ingresado.
+        assertEquals(cliente1, resultado.getCliente());
     }
 }
