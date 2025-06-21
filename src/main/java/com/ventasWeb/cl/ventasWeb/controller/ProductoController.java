@@ -16,20 +16,37 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ventasWeb.cl.ventasWeb.model.Producto;
 import com.ventasWeb.cl.ventasWeb.service.ProductoService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 @RestController
 @RequestMapping ("/api/v1/producto")
+// @Tag es para la documentación.
+@Tag(name = "Producto", description = "Son las operaciones relacionadas con los productos.")
 public class ProductoController {
 
     // Creamos la variable que contiene la funcionalidad del service.
     @Autowired
     private ProductoService Pservice;
 
-    // Métodos.
+    // Métodos. 
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica don una página web.
 
     // Método que lista los productos.
     @GetMapping ("/listar")
+    @Operation(summary = "Obtener todos los productos.", description = "Obtiene una lista con todos los productos.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Producto.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontraron productos."),
+    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    })
     public ResponseEntity<List<Producto>> buscarTodos(){
         // Buscamos los productos y los guardamos en una variable.
         List<Producto> productos = Pservice.buscarTodos();
@@ -43,6 +60,14 @@ public class ProductoController {
 
     // Método para buscar por id.
     @GetMapping ("/{id}")
+    @Operation(summary = "Obtener un producto por su id.", description = "Obtiene un producto.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json",
+        schema = @Schema (implementation = Producto.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el producto."),
+    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    })
     public ResponseEntity<Producto> buscarPorRun(@PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
@@ -58,6 +83,14 @@ public class ProductoController {
 
     // Método para buscar por nombre.
     @GetMapping ("/buscar/{nombre}")
+    @Operation(summary = "Obtener un producto por su nombre.", description = "Obtiene un producto.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json",
+        schema = @Schema (implementation = Producto.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el producto."),
+    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    })
     public ResponseEntity<Producto> buscarPorNombre(@PathVariable String nombre){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
@@ -73,6 +106,14 @@ public class ProductoController {
 
     // Método que guarda.
     @PostMapping ("/agregar")
+    @Operation(summary = "Agrega un producto", description = "Crea un producto.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Creación ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json",
+        schema = @Schema (implementation = Producto.class))),
+    @ApiResponse(responseCode = "404", description = "no se creó el producto."),
+    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    })
     public ResponseEntity<Producto> guardar (@RequestBody Producto p){
         // Creamos una variable que contiene el nuevo producto y lo guardamos al mismo tiempo.
         Producto P = Pservice.guardar(p);
@@ -82,6 +123,14 @@ public class ProductoController {
 
     // Método que borra.
     @DeleteMapping("/{id}")
+    @Operation(summary = "Elimina un producto", description = "Elimina un producto.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json",
+        schema = @Schema (implementation = Producto.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el producto."),
+    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    })
     public ResponseEntity<?> borrar(@PathVariable Long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
@@ -99,6 +148,14 @@ public class ProductoController {
     // Los argumentos que recibe la funcion es un id para buscar el inventario a editar y un inventario nuevo,
     // los atributos de este inventario nuevo van a reemplazar los atributos del inventario encontrado.
     @PutMapping ("/{id}")
+    @Operation(summary = "Actualiza un producto", description = "Actualiza un producto.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json",
+        schema = @Schema (implementation = Producto.class))),
+    @ApiResponse(responseCode = "404", description = "no se creó el producto."),
+    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    })
     public ResponseEntity<Producto> actualizar (@PathVariable long id, @RequestBody Producto p){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
