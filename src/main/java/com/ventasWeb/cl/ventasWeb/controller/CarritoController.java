@@ -18,9 +18,18 @@ import com.ventasWeb.cl.ventasWeb.model.Cliente;
 import com.ventasWeb.cl.ventasWeb.service.CarritoService;
 import com.ventasWeb.cl.ventasWeb.service.ClienteService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 @RestController
 @RequestMapping ("/api/v1/carrito")
+// @Tag es para la documentación.
+@Tag(name = "Carrito", description = "Son las operaciones relacionadas con los carritos de compra.")
 public class CarritoController {
 
     // Creamos una variable que contiene la funcionalidad del service.
@@ -32,8 +41,16 @@ public class CarritoController {
     // Métodos.
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica don una página web.
 
-    // Método que lista los productos.
+    // Método que lista los carritos.
     @GetMapping ("/listar")
+    @Operation(summary = "Obtener todos los carritos.", description = "Obtiene una lista con todos los carritos.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Carrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontraron carritos."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<List<Carrito>> buscarTodos(){
         // Buscamos los carritos y los guardamos en una variable.
         List<Carrito> carritos = cs.buscarTodos();
@@ -47,6 +64,14 @@ public class CarritoController {
 
     // Método que busca por id.
     @GetMapping ("/{id}")
+    @Operation(summary = "Busca un carrito por id.", description = "Obtiene un carrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Carrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<Carrito> buscarPorRun(@PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
@@ -62,6 +87,14 @@ public class CarritoController {
 
     // Método para guardar.
     @PostMapping("/agregar")
+    @Operation(summary = "Agrega un carrito nuevo.", description = "Agrega un carrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Carrito agregado exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Carrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<Carrito> guardar (@RequestBody Carrito c){
         // Creamos una variable que contiene el nuevo carrito y lo guardamos al mismo tiempo.
         Carrito C = cs.guardar(c);
@@ -71,6 +104,14 @@ public class CarritoController {
 
     // Método que borra.
     @DeleteMapping("/{id}")
+    @Operation(summary = "Elimina un carrito por su id.", description = "Elimina un carrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Carrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<?> borrar(@PathVariable Long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
@@ -88,6 +129,14 @@ public class CarritoController {
     // Los argumentos que recibe la funcion es un id para buscar el inventario a editar y un inventario nuevo, 
     // los atributos de este inventario nuevo van a reemplazar los atributos del inventario encontrado.
     @PutMapping ("/{id}")
+    @Operation(summary = "Actualiza un carrito por su id.", description = "Actualiza un carrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Carrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<Carrito> actualizar (@PathVariable long id, @RequestBody Carrito c){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
@@ -109,6 +158,14 @@ public class CarritoController {
 
     // Agregar producto al carrito.
     @PostMapping("/agregar-producto/{id_producto}/{run_cliente}/{cantidad}")
+    @Operation(summary = "Agrega un carrito al producto.", description = "Agrega un producto al carrito.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "El producto se agregó al carrito exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Carrito.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el producto y/o carrito."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<Carrito> agregarProductoCarrito(@PathVariable long id_producto, @PathVariable long run_cliente, @PathVariable int cantidad) {
         // LLamamos a la funcion que hace la pega.
         cs.agregarProductoCarrito(id_producto, run_cliente, cantidad);

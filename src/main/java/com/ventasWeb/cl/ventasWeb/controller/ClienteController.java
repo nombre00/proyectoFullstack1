@@ -18,9 +18,18 @@ import com.ventasWeb.cl.ventasWeb.model.Cliente;
 import com.ventasWeb.cl.ventasWeb.service.CarritoService;
 import com.ventasWeb.cl.ventasWeb.service.ClienteService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 
 @RestController
 @RequestMapping ("/api/v1/cliente")
+// @Tag es para la documentación.
+@Tag(name = "Cliente", description = "Son las operaciones relacionadas con los clientes.")
 public class ClienteController {
 
     // Creamos la variable que contiene la funcionalidad del service.
@@ -31,8 +40,17 @@ public class ClienteController {
 
     // Métodos.
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica don una página web.
+
     // Método que lista los clientes.
     @GetMapping ("/listar")
+    @Operation(summary = "Obtener todos los clientes.", description = "Obtiene una lista con todos los clientes.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontraron clientes."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<List<Cliente>> buscarTodos(){
         // Buscamos los clientes y los guardamos en una variable.
         List<Cliente> clientes = cs.buscarTodos();
@@ -46,6 +64,14 @@ public class ClienteController {
 
     // Método para buscar por id.
     @GetMapping ("/{id}")
+    @Operation(summary = "Obtener un cliente por su id.", description = "Obtiene un cliente.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<Cliente> buscarPorRun(@PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
@@ -61,6 +87,14 @@ public class ClienteController {
 
     // Método que guarda.
     @PostMapping ("/agregar")
+    @Operation(summary = "Agrega un cliente nuevo.", description = "Agrega un cliente.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Cliente agregado exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<Cliente> guardar (@RequestBody Cliente c){
         // Creamos una variable que contiene el nuevo producto y y revisamos si incluye un carrito, sino, lo creamos.
         Cliente C = c;
@@ -78,6 +112,14 @@ public class ClienteController {
 
     // Método que borra.
     @DeleteMapping("/borrar/{id}")
+    @Operation(summary = "Elimina un cliente por su id.", description = "Elimina un cliente.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<?> borrar(@PathVariable Long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
@@ -95,6 +137,14 @@ public class ClienteController {
     // Los argumentos que recibe la funcion es un id para buscar el cliente a editar y un cliente nuevo,
     // los atributos de este cliente nuevo van a reemplazar los atributos del cliente encontrado.
     @PutMapping ("/{id}")
+    @Operation(summary = "Actualiza un cliente por su id.", description = "Actualiza un cliente.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<Cliente> actualizar (@PathVariable long id, @RequestBody Cliente c){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
@@ -123,6 +173,14 @@ public class ClienteController {
 
     // Método para ingresar a la cuenta.
     @GetMapping("/ingresar_cuenta/{nombre}/{clave}")
+    @Operation(summary = "Simula un ingreso a la cuenta de un cliente", description = "Ingreso de sesión de un cliente.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Ingreso ejecutada exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<String> ingresar(@PathVariable String nombre, @PathVariable String clave){
         // Creamos un string.
         String sentencia = "";
@@ -136,8 +194,18 @@ public class ClienteController {
         return ResponseEntity.noContent().build();
     }
 
-    // Método que actualiza el carro. 
+    // Método que actualiza el carro del cliente, pasa un carrito que se pagó a la lista de carritos pagados,
+    // y le pasa al cliente un nuevo carrito para comprar.
     @PutMapping("/actualizarCarro/{id}")
+    @Operation(summary = "Actualiza el carrito de un cliente por su id.", 
+    description = "Obtiene un cliente, pasa su carrito pagado a la lista de carritos pagados y lo reempaza por un carrito nuevo.")
+    @ApiResponses( value = {
+        @ApiResponse(responseCode = "200", description = "Reemplazo ejecutado exitosamente.",
+        content = @Content(mediaType = "application/json", 
+        schema = @Schema (implementation = Cliente.class))),
+    @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
+    })
     public ResponseEntity<Cliente> actualizarCarro(@PathVariable long id){
         // Buscamos el cliente y lo guardamos en una variable.
         Cliente cliente = cs.buscarPorId(id);

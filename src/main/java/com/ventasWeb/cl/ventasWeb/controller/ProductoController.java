@@ -45,7 +45,7 @@ public class ProductoController {
         content = @Content(mediaType = "application/json", 
         schema = @Schema (implementation = Producto.class))),
     @ApiResponse(responseCode = "404", description = "no se encontraron productos."),
-    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
     public ResponseEntity<List<Producto>> buscarTodos(){
         // Buscamos los productos y los guardamos en una variable.
@@ -66,7 +66,7 @@ public class ProductoController {
         content = @Content(mediaType = "application/json",
         schema = @Schema (implementation = Producto.class))),
     @ApiResponse(responseCode = "404", description = "no se encontró el producto."),
-    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
     public ResponseEntity<Producto> buscarPorRun(@PathVariable int id){
         // Encerramos la funcionalidad dentro de un try/catch.
@@ -89,7 +89,7 @@ public class ProductoController {
         content = @Content(mediaType = "application/json",
         schema = @Schema (implementation = Producto.class))),
     @ApiResponse(responseCode = "404", description = "no se encontró el producto."),
-    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
     public ResponseEntity<Producto> buscarPorNombre(@PathVariable String nombre){
         // Encerramos la funcionalidad dentro de un try/catch.
@@ -112,7 +112,7 @@ public class ProductoController {
         content = @Content(mediaType = "application/json",
         schema = @Schema (implementation = Producto.class))),
     @ApiResponse(responseCode = "404", description = "no se creó el producto."),
-    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
     public ResponseEntity<Producto> guardar (@RequestBody Producto p){
         // Creamos una variable que contiene el nuevo producto y lo guardamos al mismo tiempo.
@@ -129,7 +129,7 @@ public class ProductoController {
         content = @Content(mediaType = "application/json",
         schema = @Schema (implementation = Producto.class))),
     @ApiResponse(responseCode = "404", description = "no se encontró el producto."),
-    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
     public ResponseEntity<?> borrar(@PathVariable Long id){
         // Encerramos la funcionalidad dentro de un try/catch.
@@ -154,7 +154,7 @@ public class ProductoController {
         content = @Content(mediaType = "application/json",
         schema = @Schema (implementation = Producto.class))),
     @ApiResponse(responseCode = "404", description = "no se creó el producto."),
-    @ApiResponse(responseCode = "500", description = "Eror interno del sistema.")
+    @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
     public ResponseEntity<Producto> actualizar (@PathVariable long id, @RequestBody Producto p){
         // Encerramos la funcionalidad dentro de un try/catch.
