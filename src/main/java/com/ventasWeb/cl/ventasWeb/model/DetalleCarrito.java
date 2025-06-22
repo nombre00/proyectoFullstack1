@@ -36,6 +36,7 @@ public class DetalleCarrito {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_producto", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
     private Producto producto;
 
     @Column(name = "cantidad", nullable = false)

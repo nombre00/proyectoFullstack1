@@ -220,7 +220,7 @@ public class VentaWebService {
                 // Luego llenamos los datos de la factura.
                 factura.setClienteEmail(cliente.getMail());
                 factura.setFechaEmision("hoy");
-                factura.setContenidoFactura(valorCarrito2(run));
+                factura.setContenidoFactura("");
                 // Guardamos la factura.
                 fr.save(factura);
 

@@ -1,6 +1,11 @@
 package com.ventasWeb.cl.ventasWeb.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +99,7 @@ public class ClienteControllerV2 {
         @PathVariable long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
-            // Buscamos por run y guardamos el producto en una variable.
+            // Buscamos por run y guardamos el cliente en una variable.
             Cliente cliente = cs.buscarPorId(id);
             // Si el objeto está vacío retornamos una respuesta not found.
             if (cliente == null) {
@@ -197,7 +202,7 @@ public class ClienteControllerV2 {
         @RequestBody Cliente c){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
-            // Buscamos el producto a editar y lo guardamos en una variable.
+            // Buscamos el cliente a editar y lo guardamos en una variable.
             Cliente Cactualizado = cs.buscarPorId(id);
             // Reemplazamos los atributos.
             Cactualizado.setRun_cliente(id);
@@ -221,7 +226,7 @@ public class ClienteControllerV2 {
             // Si no guardamos retornamos una respuesta vacía.
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-    }
+    } 
 
     // Método para ingresar a la cuenta.
     @GetMapping(value = "/ingresar_cuenta/{nombre}/{clave}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
@@ -233,20 +238,26 @@ public class ClienteControllerV2 {
     @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<String> ingresar(
+    public EntityModel<Map<String, String>> ingresar(
         // Parameter es para el swagger.
         @Parameter(description = "Nombre del cliente", required = true)@PathVariable String nombre, 
         @Parameter(description = "Clave del cliente", required = true)@PathVariable String clave){
         // Creamos un string.
         String sentencia = "";
-        // Le pasamos los argumentos a la función que revisa la clave e is.
+        // Le pasamos los argumentos a la función que revisa la clave e id.
         if (cs.ingresar(nombre, clave)){
             sentencia = "Ingresando a la página, bienvenido.";
+            // Guardamos la variable dentro de un Map ya que hateoas espera una estructura con clave-valor.
+            Map<String,String> respuesta = new HashMap<>();
+            respuesta.put("clave", sentencia);
             // Retornamos la sentencia dentro de la respuesta.
-            return ResponseEntity.ok(sentencia);
+            return EntityModel.of(respuesta,
+            linkTo(methodOn(ClienteControllerV2.class).ingresar(nombre, clave)).withSelfRel(),
+            linkTo(methodOn(ProductoControllerV2.class).buscarTodos()).withRel("Productos disponibles.")
+            );
         }
         // Si no, retornamos una respuesta vacía.
-        return ResponseEntity.noContent().build();
+        return EntityModel.of(null);
     }
 
     // Método que actualiza el carro del cliente, pasa un carrito que se pagó a la lista de carritos pagados,
@@ -261,7 +272,7 @@ public class ClienteControllerV2 {
     @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Cliente> actualizarCarro(@Parameter(description = "Id del cliente", required = true)
+    public ResponseEntity<EntityModel<Cliente>> actualizarCarro(@Parameter(description = "Id del cliente", required = true)
     @PathVariable long id){
         // Buscamos el cliente y lo guardamos en una variable.
         Cliente cliente = cs.buscarPorId(id);
@@ -284,6 +295,10 @@ public class ClienteControllerV2 {
         cliente.setCarrito(carrito);
         // Guardamos el cliente editado.
         cs.guardar(cliente);
-        return ResponseEntity.ok(cliente);
+
+        // Transformamos el objeto en una entidadModelo con assembler.
+        EntityModel<Cliente> entityModel = assembler.toModel(cliente);
+        // Retornamos la entidadModelo con el objeto y links.
+        return ResponseEntity.ok(entityModel);
     }
 }

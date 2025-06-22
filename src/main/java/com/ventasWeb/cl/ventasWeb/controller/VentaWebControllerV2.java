@@ -1,6 +1,11 @@
 package com.ventasWeb.cl.ventasWeb.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +59,7 @@ public class VentaWebControllerV2 {
     private final VentaWebRepresentationModelAssembler assembler = new VentaWebRepresentationModelAssembler();
 
     // Métodos.
-    // Abajo se usa un tipo de dato ResposeEntity, es el saludo 
-    // que se da cuando se comunica con una página web.
+    // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica con una página web.
 
     // Método que lista las ventasWeb.
     @GetMapping(value = "/listar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
@@ -73,12 +77,12 @@ public class VentaWebControllerV2 {
             .map(assembler::toModel)
             .collect(Collectors.toList());
 
-        // Si no encontramos ventasWeb reornamos una respuesta vacía.
+        // Si no encontramos ventasWeb retornamos una respuesta vacía.
         if (ventas.isEmpty()){
             return CollectionModel.empty();
         }
 
-        // Si tenemos ventasWeb, los retornamos dentro de una respuesta con enlace self.
+        // Si tenemos ventasWeb, las retornamos dentro de una respuesta con enlace self.
         return CollectionModel.of(ventas,WebMvcLinkBuilder.
         linkTo(WebMvcLinkBuilder.methodOn(VentaWebControllerV2.class).buscarTodos()).withSelfRel());
     }
@@ -200,7 +204,7 @@ public class VentaWebControllerV2 {
         VentaWeb vw = vws.comprarCarrito(cliente.getRun_cliente(), pago);
         System.out.println("Revisando salida");
         System.out.println(vw.getCliente().getRun_cliente());
-        // La guardamos
+        // La guardamos 
         vws.guardar(vw);
 
         // Escribimos una salida que señala los productos comprados:
@@ -229,7 +233,7 @@ public class VentaWebControllerV2 {
     @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<String>valorCarrito(
+    public EntityModel<Map<String, String>>valorCarrito(
         @Parameter(description = "ID del cliente de cuyo carrito queremos saber el costo.", required = true)
         @PathVariable long run){
 
@@ -238,18 +242,42 @@ public class VentaWebControllerV2 {
         System.out.println("nombre cliente: " + cliente.getNombre_completo());
         // Buscamos el carrito:
         Carrito carrito = cliente.getCarrito();
+
         // Calculamos el valor del carrito:
         int costo = cs.valor(carrito.getId_carrito());
-        String sentencia = ("El valor del carrito es: " + costo + "\n");
+        String sentencia1 = ("El valor del carrito es: " + costo);
+        
+        // Como hateoas tiene problemas para resolver un string con saltos de linea guardamos el string dentro de un 
+        // hashmap para tener pares key-value que resolver.
+        Map<String, String> respuesta = new HashMap<>();
+        // Agregamos el valor total a la respuesta.
+        respuesta.put("linea0", sentencia1);
+        // Creamos un string para nombrar la llave de cada valor del dicionario y le incorporamos un contador.
+        String linea = "linea";
+        int contador = 1;
+
         // Buscamos los detalles del carrito.
         String nombre;
         int cantidad;
         List<DetalleCarrito> detalles = carrito.getDetallesCarrito();
         for (DetalleCarrito d : detalles){
+            // agregamos el contador a linea.
+            String llave = linea + contador;
+            // Creamos un string que va a recibir los valores.
+            String sentencia = "";
             nombre = d.getProducto().getNombre();
             cantidad = d.getCantidadSolicitada();
-            sentencia += ("Producto: " + nombre + "       Cantidad: " + cantidad + "\n");
+            sentencia += ("Producto: " + nombre + "       Cantidad: " + cantidad);
+            // Agregamos la "linea de texto" al dicionario respuesta.
+            respuesta.put(llave, sentencia);
+            contador ++;
         }
-        return ResponseEntity.ok(sentencia);
+        // Retornamos el entityModel con el Map y links para si mismo, el cliente y ver todos los productos.
+        return EntityModel.of(respuesta,
+        linkTo(methodOn(VentaWebControllerV2.class).valorCarrito(run)).withSelfRel(),
+        linkTo(methodOn(ClienteControllerV2.class).buscarPorRun(run)).withRel("cliente."),
+        linkTo(methodOn(VentaWebControllerV2.class).comprar(run, costo)).withRel("Comprar."),
+        linkTo(methodOn(ProductoControllerV2.class).buscarTodos()).withRel("Productos disponibles.")
+        );
     }
 }

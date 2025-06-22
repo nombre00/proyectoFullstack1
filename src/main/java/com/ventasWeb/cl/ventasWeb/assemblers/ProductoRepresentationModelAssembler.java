@@ -3,6 +3,7 @@ package com.ventasWeb.cl.ventasWeb.assemblers;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 
+import com.ventasWeb.cl.ventasWeb.controller.CarritoControllerV2;
 import com.ventasWeb.cl.ventasWeb.controller.ProductoControllerV2;
 import com.ventasWeb.cl.ventasWeb.model.Producto;
 
@@ -13,9 +14,10 @@ public class ProductoRepresentationModelAssembler implements RepresentationModel
     @Override
     public EntityModel<Producto> toModel(Producto producto) {
         return EntityModel.of(producto,
-            linkTo(methodOn(ProductoControllerV2.class).buscarPorRun(producto.getId_producto())).withSelfRel()
-            // Abajo estaría el link para comprar.
-            //linkTo(methodOn(VentaWebControllerV2.class).comprar(producto.getId_producto())).withRel("agregar-al-carrito")
+        // Linkeamos el producto a si mismo y la acción para comprar.
+            linkTo(methodOn(ProductoControllerV2.class).buscarPorRun(producto.getId_producto())).withSelfRel(),
+            linkTo(methodOn(CarritoControllerV2.class).
+            agregarProductoCarrito(producto.getId_producto(), 0, 0)).withRel("Comprar:")
         );
     }
-}
+} 

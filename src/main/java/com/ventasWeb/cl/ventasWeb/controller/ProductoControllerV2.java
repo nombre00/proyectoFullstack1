@@ -68,7 +68,7 @@ public class ProductoControllerV2 {
             return CollectionModel.empty();
         }
 
-        // Si tenemos productos, los retornamos dentro de una respuesta con enlace self
+        // Si tenemos productos, los retornamos dentro de una respuesta con enlace self.
         return CollectionModel.of(productos,WebMvcLinkBuilder.
         linkTo(WebMvcLinkBuilder.methodOn(ProductoControllerV2.class).buscarTodos()).withSelfRel());
     }

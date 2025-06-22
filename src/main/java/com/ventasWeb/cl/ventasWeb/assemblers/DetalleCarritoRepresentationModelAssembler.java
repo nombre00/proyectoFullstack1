@@ -14,6 +14,7 @@ public class DetalleCarritoRepresentationModelAssembler implements Representatio
     @Override
     public EntityModel<DetalleCarrito> toModel(DetalleCarrito detalle) {
         return EntityModel.of(detalle,
+        // Linkeamos a si mismo.
         linkTo(methodOn(DetalleCarritoControllerV2.class).buscarPorId(detalle.getId_detalleCarrito())).withSelfRel()
         );
     }

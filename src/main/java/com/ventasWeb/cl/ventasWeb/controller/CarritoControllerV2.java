@@ -93,7 +93,7 @@ public class CarritoControllerV2 {
         @PathVariable long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
-            // Buscamos por run y guardamos el carrito en una variable.
+            // Buscamos por id y guardamos el carrito en una variable.
             Carrito carrito = cs.buscarPorId(id);
             // Si el objeto está vacío retornamos una respuesta not found.
             if (carrito == null) {
@@ -189,7 +189,7 @@ public class CarritoControllerV2 {
         @RequestBody Carrito c){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
-            // Buscamos el producto a editar y lo guardamos en una variable.
+            // Buscamos el carrito a editar y lo guardamos en una variable.
             Carrito CA = cs.buscarPorId(id);
             // Reemplazamos los atributos.
             CA.setId_carrito(id); 
@@ -206,7 +206,7 @@ public class CarritoControllerV2 {
             // Si no guardamos retornamos una respuesta vacía.
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-    } 
+    }  
 
     // Agregar producto al carrito.
     @PostMapping(value = "/agregar-producto/{id_producto}/{run_cliente}/{cantidad}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)

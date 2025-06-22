@@ -18,6 +18,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "VentaWeb")
@@ -53,5 +54,6 @@ public class VentaWeb {
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn ()
     @JsonIgnore
+    @ToString.Exclude
     private List<Cliente_ventaWeb> detallesCompras;
 }

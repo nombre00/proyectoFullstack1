@@ -12,6 +12,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -30,11 +31,13 @@ public class Cliente_ventaWeb {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "run_cliente", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
     private Cliente cliente;
 
     // Relación con ventaWeb
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ventaWeb", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
     private VentaWeb ventaWeb;
 }

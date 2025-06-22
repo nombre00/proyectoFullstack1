@@ -1,6 +1,11 @@
 package com.ventasWeb.cl.ventasWeb.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +102,7 @@ public class EnvioControllerV2 {
             }
             // Transformamos el objeto en una entidadModelo con assembler.
             EntityModel<Envio> entityModel = assembler.toModel(envio);
-            // Retornamos la entidadModelo con el objeto y links.
+            // Retornamos la envio con el objeto y links.
             return ResponseEntity.ok(entityModel);
         } catch (Exception e) {
             // Si no encontramos lo que buscamos devolvemos una respuesta vacía.
@@ -210,39 +215,45 @@ public class EnvioControllerV2 {
     @ApiResponse(responseCode = "404", description = "no se encontró el envio."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<String>estadoPorId(@Parameter(description = "ID del envio a buscar", required = true)
-        @PathVariable int id){
+    public EntityModel<Map<String, String>>estadoPorId(@Parameter(description = "ID del envio a buscar", required = true)
+        @PathVariable long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por id y guardamos el pedido en una variable.
             Envio e = es.buscarPorId(id);
             // Guardamos el estado en una variable.
             String E = e.getEstado();
+            // Guardamos la variable dentro de un Map ya que hateoas espera una estructura con clave-valor.
+            Map<String,String> respuesta = new HashMap<>();
+            respuesta.put("clave", E);
             // Retornamos una respuesta que contiene el estado.
-            return ResponseEntity.ok(E);
+            return EntityModel.of(respuesta,
+            linkTo(methodOn(EnvioControllerV2.class).buscarPorId(id)).withSelfRel(),
+            linkTo(methodOn(ClienteControllerV2.class).buscarPorRun(e.getCliente().getRun_cliente())).withRel("Comprador.")
+            );
         } catch (Exception e) {
             // Si no encontramos lo que buscamos devolvemos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            return EntityModel.of(null);
         }
     }
-    // Método para editar el estado del pedido por id.
+    // Método para editar el estado del envío por id.
     @PutMapping (value = "/editar_estado/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
-    @Operation(summary = "Edita el estado de un envio por su id.", description = "Edita el estado de un envío.")
+    @Operation(summary = "Edita el estado de un envío por su id.", description = "Edita el estado de un envío.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Edición ejecutada exitosamente.",
         content = @Content(mediaType = "application/json", 
         schema = @Schema (implementation = Cliente.class))),
-    @ApiResponse(responseCode = "404", description = "no se encontró el envio."),
+    @ApiResponse(responseCode = "404", description = "no se encontró el envío."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
     public ResponseEntity<EntityModel<Envio>> editarEstado(
-        @Parameter(description = "ID del envio a buscar", required = true)@PathVariable int id, 
+        @Parameter(description = "ID del envío a buscar", required = true)@PathVariable int id, 
         @Parameter(description = "Nuevo estado del envío", required = true)@PathVariable String estado){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por id y guardamos el pedido en una variable.
             Envio e = es.buscarPorId(id);
-            // Cambiamos el estado del pedido.
+            // Cambiamos el estado del envío.
             e.setEstado(estado);
             // Guardamos los cambios hechos.
             es.guardar(e);
