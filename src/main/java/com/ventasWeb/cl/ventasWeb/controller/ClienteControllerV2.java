@@ -1,8 +1,14 @@
 package com.ventasWeb.cl.ventasWeb.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +24,8 @@ import com.ventasWeb.cl.ventasWeb.model.Cliente;
 import com.ventasWeb.cl.ventasWeb.service.CarritoService;
 import com.ventasWeb.cl.ventasWeb.service.ClienteService;
 
+import com.ventasWeb.cl.ventasWeb.assemblers.ClienteRepresentationModelAssembler;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,22 +36,24 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 
 @RestController
-@RequestMapping ("/api/v1/cliente")
+@RequestMapping ("/api/v2/cliente")
 // @Tag es para la documentación.
 @Tag(name = "Cliente", description = "Son las operaciones relacionadas con los clientes.")
-public class ClienteController {
+public class ClienteControllerV2 {
 
     // Creamos la variable que contiene la funcionalidad del service.
     @Autowired
     private ClienteService cs;
     @Autowired
     private CarritoService carS;
+    // Inicializamos un assembler para combertir los objetos de clase a entidadesModelo que contienen hiperLinks.
+    private final ClienteRepresentationModelAssembler assembler = new ClienteRepresentationModelAssembler();
 
     // Métodos.
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica don una página web.
 
     // Método que lista los clientes.
-    @GetMapping ("/listar")
+    @GetMapping (value = "/listar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Obtener todos los clientes.", description = "Obtiene una lista con todos los clientes.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -52,21 +62,23 @@ public class ClienteController {
     @ApiResponse(responseCode = "404", description = "no se encontraron clientes."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<List<Cliente>> buscarTodos(){
-        // Buscamos los clientes y los guardamos en una variable.
-        List<Cliente> clientes = cs.buscarTodos();
-        System.out.println("clientes retornados por el service.");
-        System.out.println(clientes);
+    public CollectionModel<EntityModel<Cliente>> buscarTodos(){
+        // Buscamos los clientes y los transformamos con el assembler
+        List<EntityModel<Cliente>> clientes = cs.buscarTodos().stream()
+            .map(assembler::toModel)
+            .collect(Collectors.toList());
+
         // Si no encontramos clientes retornamos una respuesta vacía.
         if (clientes.isEmpty()){
-            return ResponseEntity.noContent().build();
+            return CollectionModel.empty();
         }
-        // Si tenemos productos los retornamos dentro de una respuesta.
-        return ResponseEntity.ok(clientes);
+        // Si tenemos clientes, los retornamos dentro de una respuesta con enlace self.
+        return CollectionModel.of(clientes,WebMvcLinkBuilder.
+        linkTo(WebMvcLinkBuilder.methodOn(ClienteControllerV2.class).buscarTodos()).withSelfRel());
     }
 
     // Método para buscar por id.
-    @GetMapping ("/{id}")
+    @GetMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Obtener un cliente por su id.", description = "Obtiene un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -78,22 +90,28 @@ public class ClienteController {
     // Agregamos : @Parameter(description = "ID del cliente a buscar", required = true).
     // Esto es para agregar una explicación de que hace esa variable y señalar que es obligatoria.
     // No es necesaria para que swagger reconozca el argumento en la URL.
-    public ResponseEntity<Cliente> buscarPorRun(@Parameter(description = "ID del cliente a buscar", required = true)
-        @PathVariable int id){
+    public ResponseEntity<EntityModel<Cliente>> buscarPorRun(@Parameter(description = "ID del cliente a buscar", required = true)
+        @PathVariable long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por run y guardamos el producto en una variable.
-            Cliente c = cs.buscarPorId(id);
-            // Retornamos una respuesta que contiene el producto.
-            return ResponseEntity.ok(c);
+            Cliente cliente = cs.buscarPorId(id);
+            // Si el objeto está vacío retornamos una respuesta not found.
+            if (cliente == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            // Transformamos el objeto en una entidadModelo con assembler.
+            EntityModel<Cliente> entityModel = assembler.toModel(cliente);
+            // Retornamos la entidadModelo con el objeto y links.
+            return ResponseEntity.ok(entityModel);
         } catch (Exception e) {
-            // Si no encontramos lo que buscamos devolvemos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            // Si algo falla retornamos una respuesta vacía.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     // Método que guarda.
-    @PostMapping ("/agregar")
+    @PostMapping (value = "/agregar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Agrega un cliente nuevo.", description = "Agrega un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Cliente agregado exitosamente.",
@@ -101,7 +119,7 @@ public class ClienteController {
         schema = @Schema (implementation = Cliente.class))),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Cliente> guardar (
+    public ResponseEntity<EntityModel<Cliente>> guardar (
         // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
         // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -120,12 +138,14 @@ public class ClienteController {
         }
         // Guardamos el cliente nuevo con su carrito.
         cs.guardar(C);
-        // Retornamos una respuesta que contiene el producto.
-        return ResponseEntity.ok(C);
+        // Transformamos el objeto en una entidadModelo con assembler.
+        EntityModel<Cliente> entityModel = assembler.toModel(C);
+        // Retornamos la entidadModelo con el objeto y links.
+        return ResponseEntity.ok(entityModel);
     }
 
     // Método que borra.
-    @DeleteMapping("/borrar/{id}")
+    @DeleteMapping(value = "/borrar/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Elimina un cliente por su id.", description = "Elimina un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
@@ -144,17 +164,17 @@ public class ClienteController {
             // Como acá no guardamos usamos el service directamente.
             cs.borrar(id);
             // Retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         } catch (Exception e){
-            // Cualquier error tambien retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            // Retornamos una respuesta vacía.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     // Método que actualiza.
     // Los argumentos que recibe la funcion es un id para buscar el cliente a editar y un cliente nuevo,
     // los atributos de este cliente nuevo van a reemplazar los atributos del cliente encontrado.
-    @PutMapping ("/{id}")
+    @PutMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Actualiza un cliente por su id.", description = "Actualiza un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
@@ -163,7 +183,7 @@ public class ClienteController {
     @ApiResponse(responseCode = "404", description = "no se encontró el cliente."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Cliente> actualizar (
+    public ResponseEntity<EntityModel<Cliente>> actualizar (
         // Parameter es para el swagger.
         @Parameter(description = "ID del cliente a actualizar", required = true)
         @PathVariable long id, 
@@ -192,16 +212,19 @@ public class ClienteController {
             Cactualizado.setClave(c.getClave());
             // Guardamos los cambios.
             cs.guardar(Cactualizado);
-            // Retornamos la respuesta con el inventario actualizado.
-            return ResponseEntity.ok(Cactualizado);
+
+            // Transformamos el objeto en una entidadModelo con assembler.
+            EntityModel<Cliente> entityModel = assembler.toModel(Cactualizado);
+            // Retornamos la entidadModelo con el objeto y links.
+            return ResponseEntity.ok(entityModel);
         } catch (Exception e) {
             // Si no guardamos retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     // Método para ingresar a la cuenta.
-    @GetMapping("/ingresar_cuenta/{nombre}/{clave}")
+    @GetMapping(value = "/ingresar_cuenta/{nombre}/{clave}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Simula un ingreso a la cuenta de un cliente", description = "Ingreso de sesión de un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Ingreso ejecutada exitosamente.",
@@ -228,7 +251,7 @@ public class ClienteController {
 
     // Método que actualiza el carro del cliente, pasa un carrito que se pagó a la lista de carritos pagados,
     // y le pasa al cliente un nuevo carrito para comprar.
-    @PutMapping("/actualizarCarro/{id}")
+    @PutMapping(value = "/actualizarCarro/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Actualiza el carrito de un cliente por su id.", 
     description = "Obtiene un cliente, pasa su carrito pagado a la lista de carritos pagados y lo reempaza por un carrito nuevo.")
     @ApiResponses( value = {

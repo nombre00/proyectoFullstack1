@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -29,6 +30,7 @@ public class DetalleCarrito {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_carrito", nullable = false)
     @JsonIgnore
+    @ToString.Exclude
     private Carrito carrito;
 
     @ManyToOne(fetch = FetchType.LAZY)

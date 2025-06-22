@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 
 @Entity
@@ -53,20 +54,24 @@ public class Cliente {
     // Carritos viejos.
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     @JsonIgnore
+    @ToString.Exclude
     private List<Carrito> carritosViejos = new ArrayList<>();
 
     // One to many es la relación y cascade es para que las acciones afecten las tablas referenciadas en cascada.
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @ToString.Exclude
     private List<VentaWeb> historial_comprasWeb;
 
     // One to many es la relación y cascade es para que las acciones afecten las tablas referenciadas en cascada.
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @ToString.Exclude
     private List<Cliente_ventaWeb> detallesCompras;
 
     // One to many es la relación y cascade es para que las acciones afecten las tablas referenciadas en cascada.
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @ToString.Exclude
     private List<Envio> envios = new ArrayList<>();
 }  

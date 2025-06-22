@@ -1,8 +1,13 @@
 package com.ventasWeb.cl.ventasWeb.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,8 +16,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.ventasWeb.cl.ventasWeb.assemblers.VentaWebRepresentationModelAssembler;
 import com.ventasWeb.cl.ventasWeb.model.Carrito;
 import com.ventasWeb.cl.ventasWeb.model.Cliente;
 import com.ventasWeb.cl.ventasWeb.model.DetalleCarrito;
@@ -31,10 +38,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 
 @RestController
-@RequestMapping ("/api/v1/venta_web")
+@RequestMapping ("/api/v2/venta_web")
 // @Tag es para la documentación.
 @Tag(name = "VentaWeb", description = "Son las operaciones relacionadas con las ventasWeb.")
-public class VentaWebController {
+public class VentaWebControllerV2 {
 
     // LLamamos el service de la clase.
     @Autowired
@@ -43,13 +50,15 @@ public class VentaWebController {
     private CarritoService cs;
     @Autowired
     private ClienteService cls;
+    // Inicializamos un assembler para combertir los objetos de clase a entidadesModelo que contienen hiperLinks.
+    private final VentaWebRepresentationModelAssembler assembler = new VentaWebRepresentationModelAssembler();
 
     // Métodos.
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo 
     // que se da cuando se comunica con una página web.
 
     // Método que lista las ventasWeb.
-    @GetMapping("/listar")
+    @GetMapping(value = "/listar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Obtener todas las VentasWeb.", description = "Obtiene una lista con todas las VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -58,19 +67,24 @@ public class VentaWebController {
     @ApiResponse(responseCode = "404", description = "no se encontraron VentasWeb."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<List<VentaWeb>> buscarTodos(){
-        // Buscamos las ventasWeb y las guardamos en una variable.
-        List<VentaWeb> ventasWeb = vws.buscarTodos();
+    public CollectionModel<EntityModel<VentaWeb>> buscarTodos(){
+        // Buscamos los ventasWeb y los transformamos con el assembler
+        List<EntityModel<VentaWeb>> ventas = vws.buscarTodos().stream()
+            .map(assembler::toModel)
+            .collect(Collectors.toList());
+
         // Si no encontramos ventasWeb reornamos una respuesta vacía.
-        if (ventasWeb.isEmpty()){
-            return ResponseEntity.noContent().build();
+        if (ventas.isEmpty()){
+            return CollectionModel.empty();
         }
-        // Si no, retornamos las ventasWeb en una respuesta.
-        return ResponseEntity.ok(ventasWeb);
+
+        // Si tenemos ventasWeb, los retornamos dentro de una respuesta con enlace self.
+        return CollectionModel.of(ventas,WebMvcLinkBuilder.
+        linkTo(WebMvcLinkBuilder.methodOn(VentaWebControllerV2.class).buscarTodos()).withSelfRel());
     }
 
     // Método que busca por id.
-    @GetMapping ("/{id}")
+    @GetMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Obtener una VentasWeb por su id.", description = "Obtiene un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -79,22 +93,28 @@ public class VentaWebController {
     @ApiResponse(responseCode = "404", description = "no se encontró la VentasWeb."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<VentaWeb> BuscaPorId(@Parameter(description = "ID de la VentaWeb a buscar", required = true)
-        @PathVariable int id){
+    public ResponseEntity<EntityModel<VentaWeb>> BuscaPorId(@Parameter(description = "ID de la VentaWeb a buscar", required = true)
+        @PathVariable long id){
         // Encerramos la funcionalidad en un try/catch
         try {
-            // Buscamos por id y guardamos la venta en una variable.
-            VentaWeb vw = vws.buscarPorId(id);
-            // Retornamos una respuesta que contiene la ventaWeb.
-            return ResponseEntity.ok(vw);
+            // Buscamos por ID y la guardamos en una variable.
+            VentaWeb venta = vws.buscarPorId(id);
+            // Si el objeto está vacío retornamos una respuesta not found.
+            if (venta == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            // Transformamos el objeto en una entidadModelo con assembler.
+            EntityModel<VentaWeb> entityModel = assembler.toModel(venta);
+            // Retornamos la entidadModelo con el objeto y links.
+            return ResponseEntity.ok(entityModel);
         } catch (Exception e) {
             // Si algo falla retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     // Método para eliminar.
-    @DeleteMapping ("/{id}")
+    @DeleteMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Elimina una VentasWeb por su id.", description = "Elimina un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
@@ -110,17 +130,17 @@ public class VentaWebController {
             // Usamos el service directamente.
             vws.borrar(id);
             // Retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         } catch (Exception e) {
             // Retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     // Método para actualizar.
     // Los argumentos que recibe la funcion es un id para buscar la ventaWeb a editar y recibe una ventaWeb nueva, 
     // los atributos de esta ventaWeb nueva van a reemplazar los atributos de la ventaWeb encontrada.
-    @PutMapping ("/{id}")
+    @PutMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Actualiza una VentasWeb por su id.", description = "Actualiza un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
@@ -129,7 +149,7 @@ public class VentaWebController {
     @ApiResponse(responseCode = "404", description = "no se encontró la VentasWeb."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<VentaWeb> actualizar (
+    public ResponseEntity<EntityModel<VentaWeb>> actualizar (
         @Parameter(description = "ID de la VentaWeb a actualizar", required = true)@PathVariable Integer id, 
         // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
         // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
@@ -151,16 +171,19 @@ public class VentaWebController {
             VW.setTotalPagado(vw.getTotalPagado());
             // Guardamos los cambios.
             vws.guardar(VW);
-            // Retornamos la respuesta con la ventaWeb actualizada.
-            return ResponseEntity.ok(VW);
+
+            // Transformamos el objeto en una entidadModelo con assembler.
+            EntityModel<VentaWeb> entityModel = assembler.toModel(VW);
+            // Retornamos la entidadModelo con el objeto y links.
+            return ResponseEntity.ok(entityModel);
         } catch (Exception e) {
-            // Si no guardamos retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            // Si algo falla retornamos una respuesta vacía.
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     } 
 
     // Crea una venta
-    @PostMapping("/agregar/{run}/{pago}")
+    @PostMapping(value = "/agregar/{run}/{pago}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Crea una VentasWeb.", description = "Crea un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Creación ejecutada exitosamente.",
@@ -168,7 +191,7 @@ public class VentaWebController {
         schema = @Schema (implementation = Cliente.class))),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<?> comprar(
+    public ResponseEntity<EntityModel<VentaWeb>> comprar(
         @Parameter(description = "ID del cliente", required = true)@PathVariable long run, 
         @Parameter(description = "Monto a pagar por la compra", required = true)@PathVariable int pago) {
 
@@ -190,12 +213,14 @@ public class VentaWebController {
         }
         System.out.println("\n");
 
-        // Retornamos una respuesta que contiene la ventaWeb.
-        return ResponseEntity.ok(vw);
+        // Transformamos el objeto en una entidadModelo con assembler.
+        EntityModel<VentaWeb> entityModel = assembler.toModel(vw);
+        // Retornamos la entidadModelo con el objeto y links.
+        return ResponseEntity.ok(entityModel);
     }
 
     // Método para calcular el costo del carrito.
-    @GetMapping("/carrito_costo/{run}")
+    @GetMapping(value = "/carrito_costo/{run}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Calcula el costo de un carrito por su id.", description = "Calcula el costo de un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Cálculo ejecutado exitosamente.",

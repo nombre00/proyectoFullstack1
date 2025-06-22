@@ -1,8 +1,13 @@
 package com.ventasWeb.cl.ventasWeb.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,8 +16,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.ventasWeb.cl.ventasWeb.assemblers.CarritoRepresentationModelAssembler;
 import com.ventasWeb.cl.ventasWeb.model.Carrito;
 import com.ventasWeb.cl.ventasWeb.model.Cliente;
 import com.ventasWeb.cl.ventasWeb.service.CarritoService;
@@ -28,22 +35,24 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 
 @RestController
-@RequestMapping ("/api/v1/carrito")
+@RequestMapping ("/api/v2/carrito")
 // @Tag es para la documentación.
 @Tag(name = "Carrito", description = "Son las operaciones relacionadas con los carritos de compra.")
-public class CarritoController {
+public class CarritoControllerV2 {
 
     // Creamos una variable que contiene la funcionalidad del service.
     @Autowired
     private CarritoService cs;
     @Autowired
     private ClienteService cls;
+    // Inicializamos un assembler para combertir los objetos de clase a entidadesModelo que contienen hiperLinks.
+    private static CarritoRepresentationModelAssembler assembler = new CarritoRepresentationModelAssembler();
 
     // Métodos.
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica don una página web.
 
     // Método que lista los carritos.
-    @GetMapping ("/listar")
+    @GetMapping (value = "/listar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Obtener todos los carritos.", description = "Obtiene una lista con todos los carritos.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -52,19 +61,23 @@ public class CarritoController {
     @ApiResponse(responseCode = "404", description = "no se encontraron carritos."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<List<Carrito>> buscarTodos(){
-        // Buscamos los carritos y los guardamos en una variable.
-        List<Carrito> carritos = cs.buscarTodos();
+    public CollectionModel<EntityModel<Carrito>> buscarTodos(){
+        // Buscamos los carritos y los transformamos con el assembler
+        List<EntityModel<Carrito>> carritos = cs.buscarTodos().stream()
+            .map(assembler::toModel)
+            .collect(Collectors.toList());
+
         // Si no encontramos carritos retornamos una respuesta vacía.
         if (carritos.isEmpty()){
-            return ResponseEntity.noContent().build();
+            return CollectionModel.empty();
         }
-        // Si tenemos carritos los retornamos dentro de una respuesta.
-        return ResponseEntity.ok(carritos);
+        // Si tenemos carritos, los retornamos dentro de una respuesta con enlace self.
+        return CollectionModel.of(carritos,WebMvcLinkBuilder.
+        linkTo(WebMvcLinkBuilder.methodOn(CarritoControllerV2.class).buscarTodos()).withSelfRel());
     }
 
     // Método que busca por id.
-    @GetMapping ("/{id}")
+    @GetMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Busca un carrito por id.", description = "Obtiene un carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -76,14 +89,20 @@ public class CarritoController {
     // Agregamos : @Parameter(description = "ID del carrito a buscar", required = true).
     // Esto es para agregar una explicación de que hace esa variable y señalar que es obligatoria.
     // No es necesaria para que swagger reconozca el argumento en la URL.
-    public ResponseEntity<Carrito> buscarPorRun(@Parameter(description = "ID del dueño del carrito a buscar", required = true)
+    public ResponseEntity<EntityModel<Carrito>> buscarPorRun(@Parameter(description = "ID del dueño del carrito a buscar", required = true)
         @PathVariable long id){
         // Encerramos la funcionalidad dentro de un try/catch.
         try {
             // Buscamos por run y guardamos el carrito en una variable.
-            Carrito c = cs.buscarPorId(id);
-            // Retornamos una respuesta que contiene el carrito.
-            return ResponseEntity.ok(c);
+            Carrito carrito = cs.buscarPorId(id);
+            // Si el objeto está vacío retornamos una respuesta not found.
+            if (carrito == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            // Transformamos el objeto en una entidadModelo con assembler.
+            EntityModel<Carrito> entityModel = assembler.toModel(carrito);
+            // Retornamos la entidadModelo con el objeto y links.
+            return ResponseEntity.ok(entityModel);
         } catch (Exception e) {
             // Si no encontramos lo que buscamos devolvemos una respuesta vacía.
             return ResponseEntity.noContent().build();
@@ -91,7 +110,7 @@ public class CarritoController {
     }
 
     // Método para guardar.
-    @PostMapping("/agregar")
+    @PostMapping(value = "/agregar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Agrega un carrito nuevo.", description = "Agrega un carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Carrito agregado exitosamente.",
@@ -100,7 +119,7 @@ public class CarritoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Carrito> guardar (
+    public ResponseEntity<EntityModel<Carrito>> guardar (
         // Lo de abajo es para el swagger, da una descripción, avisa que cuerpo requerido es obligatorio,
         // y content = @Content() es para que swagger genere una interfaz para ingresar en input y hacer la operación desde la documentacion.
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -111,12 +130,14 @@ public class CarritoController {
         @RequestBody Carrito c){
         // Creamos una variable que contiene el nuevo carrito y lo guardamos al mismo tiempo.
         Carrito C = cs.guardar(c);
-        // Retornamos una respuesta que contiene el carrito.
-        return ResponseEntity.ok(C);
+        // Transformamos el objeto en una entidadModelo con assembler.
+        EntityModel<Carrito> entityModel = assembler.toModel(C);
+        // Retornamos la entidadModelo con el objeto y links.
+        return ResponseEntity.ok(entityModel);
     }
 
     // Método que borra.
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Elimina un carrito por su id.", description = "Elimina un carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
@@ -135,17 +156,17 @@ public class CarritoController {
             // Como acá no guardamos usamos el service directamente.
             cs.borrar(id);
             // Retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         } catch (Exception e){
             // Cualquier error tambien retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     // Método que actualiza.
     // Los argumentos que recibe la funcion es un id para buscar el inventario a editar y un inventario nuevo, 
     // los atributos de este inventario nuevo van a reemplazar los atributos del inventario encontrado.
-    @PutMapping ("/{id}")
+    @PutMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Actualiza un carrito por su id.", description = "Actualiza un carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
@@ -154,7 +175,7 @@ public class CarritoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el carrito."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Carrito> actualizar (
+    public ResponseEntity<EntityModel<Carrito>> actualizar (
         // Parameter es para el swagger.
         @Parameter(description = "ID del carrito a actualizar", required = true)
         @PathVariable long id, 
@@ -176,16 +197,19 @@ public class CarritoController {
             CA.setPagado(c.isPagado());
             // Guardamos los cambios.
             cs.guardar(CA);
-            // Retornamos la respuesta con el inventario actualizado.
-            return ResponseEntity.ok(CA);
+
+            // Transformamos el objeto en una entidadModelo con assembler.
+            EntityModel<Carrito> entityModel = assembler.toModel(CA);
+            // Retornamos la entidadModelo con el objeto y links.
+            return ResponseEntity.ok(entityModel);
         } catch (Exception e) {
             // Si no guardamos retornamos una respuesta vacía.
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     } 
 
     // Agregar producto al carrito.
-    @PostMapping("/agregar-producto/{id_producto}/{run_cliente}/{cantidad}")
+    @PostMapping(value = "/agregar-producto/{id_producto}/{run_cliente}/{cantidad}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
     @Operation(summary = "Agrega un carrito al producto.", description = "Agrega un producto al carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "El producto se agregó al carrito exitosamente.",
@@ -194,7 +218,7 @@ public class CarritoController {
     @ApiResponse(responseCode = "404", description = "no se encontró el producto y/o carrito."),
     @ApiResponse(responseCode = "500", description = "Error interno del sistema.")
     })
-    public ResponseEntity<Carrito> agregarProductoCarrito(
+    public ResponseEntity<EntityModel<Carrito>> agregarProductoCarrito(
         // Parameter es para el swagger.
         @Parameter(description = "ID del producto que vamos a agregar", required = true)@PathVariable long id_producto, 
         @Parameter(description = "ID del cliente", required = true)@PathVariable long run_cliente, 
@@ -203,8 +227,11 @@ public class CarritoController {
         cs.agregarProductoCarrito(id_producto, run_cliente, cantidad);
         Cliente cliente = cls.buscarPorId(run_cliente);
         Carrito carrito = cliente.getCarrito();
-        // Retornamos el carrito actualizado.
-        return ResponseEntity.ok(carrito);
+
+        // Transformamos el objeto en una entidadModelo con assembler.
+        EntityModel<Carrito> entityModel = assembler.toModel(carrito);
+        // Retornamos la entidadModelo con el objeto y links.
+        return ResponseEntity.ok(entityModel);
     }
     
     

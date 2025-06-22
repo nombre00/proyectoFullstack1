@@ -18,6 +18,7 @@ import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -39,11 +40,13 @@ public class Carrito {
     @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @JsonIgnore
+    @ToString.Exclude
     private List<DetalleCarrito> detallesCarrito = new ArrayList<>();
 
     // Relación con cliente.
     @ManyToOne
     @JoinColumn(name = "id_cliente")
     @JsonIgnore
+    @ToString.Exclude
     private Cliente cliente;
 }
