@@ -56,11 +56,12 @@ public class ProductoControllerTest {
     // Creamos un objeto que vamos a usar para cada prueba.
     @BeforeEach
     void setup(){
-        // Inicializa los mocks anotados con @Mock y @InjectMocks.
+        // Inicializa los mocks.
         MockitoAnnotations.openMocks(this);
         // Inicializamos objectMapper.
         om = new ObjectMapper();
-        // Configuramos MockMvc manualmente, así evitamos cargar un constexto de spring.
+        // Configuramos MockMvc manualmente, 
+        // así evitamos cargar un constexto de spring.
         mmvc = MockMvcBuilders.standaloneSetup(pc).build();
         // Inicializamos el producto.
         p = new Producto();
@@ -97,7 +98,7 @@ public class ProductoControllerTest {
                 // Verificamos el precio.
                 .andExpect(jsonPath("$[0].precio").value(p.getPrecio()));
 
-        // Verificamos que el método buscarTodos() del servicio fue llamado exactamente una vez.
+        // Verificamos que el mock fue llamado exactamente una vez.
         verify(ps, times(1)).buscarTodos();
     }
 

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.ventasWeb.cl.ventasWeb.assemblers.CarritoRepresentationModelAssembler;
@@ -52,7 +53,10 @@ public class CarritoControllerV2 {
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica don una página web.
 
     // Método que lista los carritos.
-    @GetMapping (value = "/listar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/listar", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener todos los carritos.", description = "Obtiene una lista con todos los carritos.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -77,7 +81,10 @@ public class CarritoControllerV2 {
     }
 
     // Método que busca por id.
-    @GetMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Busca un carrito por id.", description = "Obtiene un carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -110,7 +117,10 @@ public class CarritoControllerV2 {
     }
 
     // Método para guardar.
-    @PostMapping(value = "/agregar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PostMapping(value = "/agregar", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Agrega un carrito nuevo.", description = "Agrega un carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Carrito agregado exitosamente.",
@@ -137,7 +147,10 @@ public class CarritoControllerV2 {
     }
 
     // Método que borra.
-    @DeleteMapping(value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @DeleteMapping(value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Elimina un carrito por su id.", description = "Elimina un carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
@@ -166,7 +179,10 @@ public class CarritoControllerV2 {
     // Método que actualiza.
     // Los argumentos que recibe la funcion es un id para buscar el inventario a editar y un inventario nuevo, 
     // los atributos de este inventario nuevo van a reemplazar los atributos del inventario encontrado.
-    @PutMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PutMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Actualiza un carrito por su id.", description = "Actualiza un carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
@@ -209,7 +225,10 @@ public class CarritoControllerV2 {
     }  
 
     // Agregar producto al carrito.
-    @PostMapping(value = "/agregar-producto/{id_producto}/{run_cliente}/{cantidad}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PostMapping(value = "/agregar-producto/{id_producto}/{run_cliente}/{cantidad}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Agrega un carrito al producto.", description = "Agrega un producto al carrito.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "El producto se agregó al carrito exitosamente.",

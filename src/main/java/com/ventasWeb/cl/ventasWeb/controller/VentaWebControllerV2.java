@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.ventasWeb.cl.ventasWeb.assemblers.VentaWebRepresentationModelAssembler;
@@ -62,7 +63,10 @@ public class VentaWebControllerV2 {
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica con una página web.
 
     // Método que lista las ventasWeb.
-    @GetMapping(value = "/listar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping(value = "/listar", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener todas las VentasWeb.", description = "Obtiene una lista con todas las VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -88,7 +92,10 @@ public class VentaWebControllerV2 {
     }
 
     // Método que busca por id.
-    @GetMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener una VentasWeb por su id.", description = "Obtiene un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -118,7 +125,10 @@ public class VentaWebControllerV2 {
     }
 
     // Método para eliminar.
-    @DeleteMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @DeleteMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Elimina una VentasWeb por su id.", description = "Elimina un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
@@ -144,7 +154,10 @@ public class VentaWebControllerV2 {
     // Método para actualizar.
     // Los argumentos que recibe la funcion es un id para buscar la ventaWeb a editar y recibe una ventaWeb nueva, 
     // los atributos de esta ventaWeb nueva van a reemplazar los atributos de la ventaWeb encontrada.
-    @PutMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PutMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Actualiza una VentasWeb por su id.", description = "Actualiza un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
@@ -187,7 +200,10 @@ public class VentaWebControllerV2 {
     } 
 
     // Crea una venta
-    @PostMapping(value = "/agregar/{run}/{pago}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PostMapping(value = "/agregar/{run}/{pago}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Crea una VentasWeb.", description = "Crea un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Creación ejecutada exitosamente.",
@@ -224,7 +240,10 @@ public class VentaWebControllerV2 {
     }
 
     // Método para calcular el costo del carrito.
-    @GetMapping(value = "/carrito_costo/{run}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping(value = "/carrito_costo/{run}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Calcula el costo de un carrito por su id.", description = "Calcula el costo de un VentasWeb.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Cálculo ejecutado exitosamente.",

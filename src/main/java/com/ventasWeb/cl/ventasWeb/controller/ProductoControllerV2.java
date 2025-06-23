@@ -9,6 +9,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +49,10 @@ public class ProductoControllerV2 {
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica don una página web.
 
     // Método que lista los productos.
-    @GetMapping (value = "/listar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/listar", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener todos los productos.", description = "Obtiene una lista con todos los productos.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -74,7 +78,10 @@ public class ProductoControllerV2 {
     }
 
     // Método para buscar por id.
-    @GetMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener un producto por su id.", description = "Obtiene un producto.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -106,7 +113,10 @@ public class ProductoControllerV2 {
     }
 
     // Método para buscar por nombre.
-    @GetMapping (value = "/buscar/{nombre}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/buscar/{nombre}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener un producto por su nombre.", description = "Obtiene un producto.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -137,7 +147,10 @@ public class ProductoControllerV2 {
     }
 
     // Método que guarda.
-    @PostMapping (value = "/agregar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PostMapping (value = "/agregar", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Agrega un producto", description = "Crea un producto.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "201", description = "Creación ejecutada exitosamente.",
@@ -164,7 +177,10 @@ public class ProductoControllerV2 {
     }
 
     // Método que borra.
-    @DeleteMapping(value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @DeleteMapping(value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Elimina un producto", description = "Elimina un producto.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
@@ -193,7 +209,10 @@ public class ProductoControllerV2 {
     // Método que actualiza.
     // Los argumentos que recibe la funcion es un id para buscar el inventario a editar y un inventario nuevo,
     // los atributos de este inventario nuevo van a reemplazar los atributos del inventario encontrado.
-    @PutMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PutMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Actualiza un producto", description = "Actualiza un producto.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",

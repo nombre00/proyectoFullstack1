@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.ventasWeb.cl.ventasWeb.assemblers.EnvioRepresentationModelAssembler;
@@ -56,7 +57,10 @@ public class EnvioControllerV2 {
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica don una página web.
 
     // Método que lista los envios.
-    @GetMapping(value = "/listar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping(value = "/listar", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener todos los envios.", description = "Obtiene una lista con todos los envios.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -81,7 +85,10 @@ public class EnvioControllerV2 {
     }
 
     // Método que busca por id.
-    @GetMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener un envio por su id.", description = "Obtiene un envío.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -111,7 +118,10 @@ public class EnvioControllerV2 {
     }
 
     // Método para guardar.
-    @PostMapping (value = "/agregar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PostMapping (value = "/agregar", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Guardar un envio.", description = "Guarda un envío.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Creación ejecutada exitosamente.",
@@ -137,7 +147,10 @@ public class EnvioControllerV2 {
     }
 
     // Método que borra.
-    @DeleteMapping(value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @DeleteMapping(value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Eliminar un envio por su id.", description = "Elimina un envío.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
@@ -163,7 +176,10 @@ public class EnvioControllerV2 {
     // Método que actualiza.
     // Los argumentos que recibe la funcion es un id para buscar el inventario a editar y un inventario nuevo, 
     // los atributos de este inventario nuevo van a reemplazar los atributos del inventario encontrado.
-    @PutMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PutMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Actualiza un envio por su id.", description = "Actualiza un envío.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
@@ -206,7 +222,10 @@ public class EnvioControllerV2 {
     }
 
     // Método para buscar estado del envio por id.
-    @GetMapping (value = "/revisar_estado/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/revisar_estado/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener el estado de un envio por su id.", description = "Obtiene un estado de envío.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -237,7 +256,10 @@ public class EnvioControllerV2 {
         }
     }
     // Método para editar el estado del envío por id.
-    @PutMapping (value = "/editar_estado/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PutMapping (value = "/editar_estado/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Edita el estado de un envío por su id.", description = "Edita el estado de un envío.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Edición ejecutada exitosamente.",

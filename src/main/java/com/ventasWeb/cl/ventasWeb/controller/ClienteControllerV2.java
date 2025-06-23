@@ -38,6 +38,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.MediaType;
 
 
 @RestController
@@ -58,7 +59,10 @@ public class ClienteControllerV2 {
     // Abajo se usa un tipo de dato ResposeEntity, es el saludo que se da cuando se comunica don una página web.
 
     // Método que lista los clientes.
-    @GetMapping (value = "/listar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/listar", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener todos los clientes.", description = "Obtiene una lista con todos los clientes.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -83,7 +87,10 @@ public class ClienteControllerV2 {
     }
 
     // Método para buscar por id.
-    @GetMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Obtener un cliente por su id.", description = "Obtiene un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Búsqueda ejecutada exitosamente.",
@@ -116,7 +123,10 @@ public class ClienteControllerV2 {
     }
 
     // Método que guarda.
-    @PostMapping (value = "/agregar", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PostMapping (value = "/agregar", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Agrega un cliente nuevo.", description = "Agrega un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Cliente agregado exitosamente.",
@@ -150,7 +160,10 @@ public class ClienteControllerV2 {
     }
 
     // Método que borra.
-    @DeleteMapping(value = "/borrar/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @DeleteMapping(value = "/borrar/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Elimina un cliente por su id.", description = "Elimina un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Eliminación ejecutada exitosamente.",
@@ -179,7 +192,10 @@ public class ClienteControllerV2 {
     // Método que actualiza.
     // Los argumentos que recibe la funcion es un id para buscar el cliente a editar y un cliente nuevo,
     // los atributos de este cliente nuevo van a reemplazar los atributos del cliente encontrado.
-    @PutMapping (value = "/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PutMapping (value = "/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Actualiza un cliente por su id.", description = "Actualiza un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Actualización ejecutada exitosamente.",
@@ -229,7 +245,10 @@ public class ClienteControllerV2 {
     } 
 
     // Método para ingresar a la cuenta.
-    @GetMapping(value = "/ingresar_cuenta/{nombre}/{clave}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @GetMapping(value = "/ingresar_cuenta/{nombre}/{clave}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Simula un ingreso a la cuenta de un cliente", description = "Ingreso de sesión de un cliente.")
     @ApiResponses( value = {
         @ApiResponse(responseCode = "200", description = "Ingreso ejecutada exitosamente.",
@@ -262,7 +281,10 @@ public class ClienteControllerV2 {
 
     // Método que actualiza el carro del cliente, pasa un carrito que se pagó a la lista de carritos pagados,
     // y le pasa al cliente un nuevo carrito para comprar.
-    @PutMapping(value = "/actualizarCarro/{id}", produces = MediaTypes.HAL_FORMS_JSON_VALUE)
+    @PutMapping(value = "/actualizarCarro/{id}", produces = {
+        MediaTypes.HAL_JSON_VALUE,
+        MediaType.APPLICATION_JSON_VALUE
+    })
     @Operation(summary = "Actualiza el carrito de un cliente por su id.", 
     description = "Obtiene un cliente, pasa su carrito pagado a la lista de carritos pagados y lo reempaza por un carrito nuevo.")
     @ApiResponses( value = {
