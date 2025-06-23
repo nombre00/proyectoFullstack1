@@ -10,3 +10,4 @@ public class VentasWebVMAplication {
         SpringApplication.run(VentasWebVMAplication.class, args);
     }    
 }
+ 
